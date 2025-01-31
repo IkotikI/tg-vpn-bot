@@ -1,0 +1,21 @@
+package templates
+
+import (
+	"vpn-tg-bot/internal/storage"
+	components "vpn-tg-bot/web/admin_panel/components"
+)
+
+templ Users(users *[]storage.User) {
+	<ul>
+		for _, user := range *users {
+			<li>
+				@components.User(user)
+				// @Test()
+			</li>
+		}
+	</ul>
+}
+
+templ Test() {
+	<div>Test</div>
+}

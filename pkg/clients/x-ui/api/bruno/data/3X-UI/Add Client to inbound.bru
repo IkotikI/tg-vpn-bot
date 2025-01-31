@@ -1,0 +1,36 @@
+meta {
+  name: Add Client to inbound
+  type: http
+  seq: 9
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/panel/api/inbounds/addClient
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+body:json {
+  {
+    "id": 2,
+    "settings": "{\"clients\": [{\"id\": \"bbfad557-28f2-47e5-9f3d-e3c7f532fbda\",\"flow\": \"\",\"email\": \"dp1plmlt8\",\"limitIp\": 0,\"totalGB\": 0,\"expiryTime\": 0,\"enable\": true,\"tgId\": \"\",\"subId\": \"2rv0gb458kbfl532\",\"reset\": 0}]}"
+  }
+}
+
+docs {
+  ## Description
+  
+  This route is used to add a new client to a specific inbound identified by its ID.
+  
+  ## Note
+  
+  - Requires a valid session ID (from the login endpoint), Include the session ID stored in the cookie named "session" for authorization.
+      
+  - Verify that the provided inbound ID (`id`) corresponds to an existing inbound within the system.
+  - Format the client information in the `settings` parameter as a stringified JSON format within the request body.
+  - Handle any potential errors or failure messages returned in the response.
+}

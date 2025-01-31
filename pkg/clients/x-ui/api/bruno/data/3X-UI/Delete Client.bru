@@ -1,0 +1,40 @@
+meta {
+  name: Delete Client
+  type: http
+  seq: 16
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/panel/api/inbounds/{{inboundId}}/delClient/{{uuid}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+vars:pre-request {
+  inboundId: 1
+  uuid: 
+}
+
+docs {
+  ## Description
+  
+  This route is used to delete a client identified by its UUID (`{uuid}`) within a specific inbound identified by its ID (`{inboundId}`).
+  
+  ## Path Parameters
+  
+  - `{inboundId}` : Identifier of the specific inbound from which the client will be deleted.
+  - `{uuid}` : Unique identifier (UUID) of the specific client to be deleted.
+      
+  
+  ## Note
+  
+  - Requires a valid session ID (from the login endpoint). Include the session ID stored in the cookie named "session" for authorization.
+      
+  - Ensure that the provided `{inboundId}` corresponds to an existing inbound and `{uuid}` corresponds to an existing client within the system.
+  - Deleting the client through this endpoint permanently removes the specified client from the specified inbound.
+  - Handle any potential errors or failure messages returned in the response.
+}

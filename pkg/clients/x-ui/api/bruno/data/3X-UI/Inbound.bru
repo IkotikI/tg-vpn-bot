@@ -1,0 +1,38 @@
+meta {
+  name: Inbound
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/panel/api/inbounds/get/{{inboundId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+vars:pre-request {
+  inboundId: 1
+}
+
+docs {
+  ## Description
+  
+  This route is used to retrieve statistics and details for a specific inbound connection identified by `{inboundId}`. This includes information about the inbound itself, its statistics, and the clients connected to it.
+  
+  ## **Path Parameter**
+  
+  - `{inboundId}`: Identifier of the specific inbound for which information is requested.
+      
+  
+  ## Note
+  
+  - Requires a valid session ID (from the login endpoint), Include the session ID stored in the cookie named "session" for authorization.
+      
+  - Ensure that the provided `{inboundId}` corresponds to an existing inbound within the system.
+      
+  - Handle any potential errors or failure messages returned in the response.
+}

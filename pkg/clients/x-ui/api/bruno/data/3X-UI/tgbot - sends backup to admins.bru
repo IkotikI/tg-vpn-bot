@@ -1,0 +1,29 @@
+meta {
+  name: tgbot - sends backup to admins
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/panel/api/inbounds/createbackup
+  body: none
+  auth: none
+}
+
+headers {
+  : 
+}
+
+docs {
+  ## Description
+  
+  This endpoint triggers the creation of a system backup and initiates the delivery of the backup file to designated administrators via a configured Telegram bot. The server verifies the Telegram bot's activation status within the system settings and checks for the presence of admin IDs specified in the settings before sending the backup.
+  
+  ## Note
+  
+  - Requires a valid session ID (from the login endpoint). Include the session ID stored in the cookie named "session" for authorization.
+      
+  - Upon implementation, the backup file might be sent through the Telegram bot registered in the panel settings.
+      
+  - Handle any potential errors or failure messages returned in the response.
+}

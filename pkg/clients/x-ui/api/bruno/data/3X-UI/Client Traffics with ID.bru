@@ -1,0 +1,37 @@
+meta {
+  name: Client Traffics with ID
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/panel/api/inbounds/getClientTrafficsById/{{uuid}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+vars:pre-request {
+  uuid: bbfad557-28f2-47e5-9f3d-e3c7f532fbda
+}
+
+docs {
+  ## Description
+  
+  This route is used to retrieve information about a specific client based on their email. This endpoint provides details such as traffic statistics and other relevant information related to the client.
+  
+  ## **Path Parameter**
+  
+  - `{email}`: Email address of the client for whom information is requested.
+      
+  
+  ## **Note**
+  
+  - Requires a valid session ID (from the login endpoint), Include the session ID stored in the cookie named "session" for authorization.
+      
+  - Ensure that the provided `{email}` corresponds to a valid client in the system to retrieve accurate information.
+  - Handle any potential errors or failure messages returned in the response.
+}

@@ -1,0 +1,8 @@
+package templates
+
+import "vpn-tg-bot/internal/storage"
+
+templ User(user storage.User) {
+	Hello World!
+	{ user.TelegramName }
+}

@@ -1,0 +1,38 @@
+meta {
+  name: Delete Inbound
+  type: http
+  seq: 17
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/panel/api/inbounds/del/{{inboundId}}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+vars:pre-request {
+  inboundId: 2
+}
+
+docs {
+  ## Description
+  
+  This route is used to delete an inbound identified by its ID (`{inboundId}`).
+  
+  ## Path Parameter
+  
+  - `{inboundId}` : Identifier of the specific inbound to be deleted.
+      
+  
+  ## Note
+  
+  - Requires a valid session ID (from the login endpoint). Include the session ID stored in the cookie named "session" for authorization.
+      
+  - Ensure that the provided `{inboundId}` corresponds to an existing inbound within the system.
+  - Deleting the inbound through this endpoint permanently removes the specified inbound.
+  - Handle any potential errors or failure messages returned in the response.
+}

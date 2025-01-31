@@ -1,0 +1,16 @@
+meta {
+  name: 3X-UI
+}
+
+auth {
+  mode: none
+}
+
+vars:pre-request {
+  PORT: 2053
+  WEBBASEPATH: 
+}
+
+script:pre-request {
+  req.setHeader("Cookie", bru.getVar("Cookie")); 
+}

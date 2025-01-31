@@ -1,0 +1,56 @@
+meta {
+  name: Update Inbound
+  type: http
+  seq: 10
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/panel/api/inbounds/update/{{inboundId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+body:json {
+  {
+    "up": 0,
+    "down": 0,
+    "total": 0,
+    "remark": "",
+    "enable": true,
+    "expiryTime": 0,
+    "listen": "",
+    "port": 44360,
+    "protocol": "vless",
+    "settings": "{\n  \"clients\": [\n    {\n      \"id\": \"a39c9655-bcbb-43c4-9b3b-ebd8b7ae9e1e\",\n      \"flow\": \"\",\n      \"email\": \"s729v2km\",\n      \"limitIp\": 0,\n      \"totalGB\": 0,\n      \"expiryTime\": 0,\n      \"enable\": true,\n      \"tgId\": \"\",\n      \"subId\": \"n2b9ubaioe06cak8\",\n      \"reset\": 0\n    }\n  ],\n  \"decryption\": \"none\",\n  \"fallbacks\": []\n}",
+    "streamSettings": "{\n  \"network\": \"tcp\",\n  \"security\": \"none\",\n  \"externalProxy\": [],\n  \"tcpSettings\": {\n    \"acceptProxyProtocol\": false,\n    \"header\": {\n      \"type\": \"none\"\n    }\n  }\n}",
+    "sniffing": "{\n  \"enabled\": false,\n  \"destOverride\": [\n    \"http\",\n    \"tls\",\n    \"quic\",\n    \"fakedns\"\n  ],\n  \"metadataOnly\": false,\n  \"routeOnly\": false\n}",
+    "allocate": "{\n  \"strategy\": \"always\",\n  \"refresh\": 5,\n  \"concurrency\": 3\n}"
+  }
+}
+
+vars:pre-request {
+  inboundId: 1
+}
+
+docs {
+  ## Description
+  
+  This route is used to update an existing inbound identified by its ID (`{inboundId}`).
+  
+  ## **Path Parameter**
+  
+  - `{inboundId}`: Identifier of the specific inbound to be updated.
+      
+  
+  ## Note
+  
+  - Requires a valid session ID (from the login endpoint), Include the session ID stored in the cookie named "session" for authorization.
+      
+  - Verify that the provided `{inboundId}` corresponds to an existing inbound within the system.
+  - Ensure that sub-arrays or objects within the JSON body are stringified in JSON format for correct parsing by the panel.
+  - Handle any potential errors or failure messages returned in the response.
+}

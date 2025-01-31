@@ -1,0 +1,33 @@
+meta {
+  name: Client Ip address
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/panel/api/inbounds/clientIps/{email}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  ## Description
+  
+  This route is used to retrieve the IP records associated with a specific client identified by their email.
+  
+  ## Path Parameter
+  
+  - **`{email}`** : Email address of the client for whom IP records are requested.
+      
+  
+  ## Note
+  
+  - Requires a valid session ID (from the login endpoint), Include the session ID stored in the cookie named "session" for authorization.
+      
+  - Ensure that the provided `{email}` corresponds to a valid client in the system to retrieve accurate IP records.
+  - Handle any potential errors or failure messages returned in the response.
+}

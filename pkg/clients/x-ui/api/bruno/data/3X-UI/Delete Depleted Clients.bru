@@ -1,0 +1,34 @@
+meta {
+  name: Delete Depleted Clients
+  type: http
+  seq: 18
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/panel/api/inbounds/delDepletedClients/{inboundId}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  ## Description
+  
+  This route is used to delete all depleted clients associated with a specific inbound identified by its ID (`{inboundId}`). If no `{inboundId}` is specified, depleted clients will be deleted from all inbounds.
+  
+  ## Path Parameter
+  
+  - `{inboundId}` : Identifier of the specific inbound from which the depleted clients will be deleted. If not specified, depleted clients will be deleted from all inbounds.
+      
+  
+  ## Note
+  
+  - Requires a valid session ID (from the login endpoint). Include the session ID stored in the cookie named "session" for authorization.
+      
+  - If `{inboundId}` is provided, ensure it corresponds to an existing inbound within the system. If not provided, depleted clients will be deleted from all inbounds.
+  - Deleting depleted clients through this endpoint permanently removes all depleted clients from the specified inbound(s).
+  - Handle any potential errors or failure messages returned in the response.
+}

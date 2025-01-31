@@ -1,0 +1,31 @@
+meta {
+  name: Reset Client Traffic
+  type: http
+  seq: 15
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/panel/api/inbounds/{inboundId}/resetClientTraffic/{email}
+  body: none
+  auth: none
+}
+
+docs {
+  ## Description
+  
+  This route is used to reset the traffic statistics for a specific client identified by their email address (`{email}`) within a particular inbound identified by its ID (`{inboundId}`).
+  
+  ## Path Parameters
+  
+  - `{inboundId}` : Identifier of the specific inbound where the client belongs.
+  - `{email}` : Email address of the client for whom traffic statistics are being reset.
+      
+  
+  ## Note
+  
+  - Requires a valid session ID (from the login endpoint). Include the session ID stored in the cookie named "session" for authorization.
+      
+  - Resetting the client traffic through this endpoint affects the statistics for the specified client within the specified inbound.
+  - Verify that the provided {inboundId} corresponds to an existing inbound and `{email}` corresponds to an existing client within the system.
+  - Handle any potential errors or failure messages returned in the response.
+}

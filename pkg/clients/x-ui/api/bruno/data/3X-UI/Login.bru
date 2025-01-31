@@ -1,0 +1,40 @@
+meta {
+  name: Login
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/login
+  body: formUrlEncoded
+  auth: none
+}
+
+body:form-urlencoded {
+  username: {{USERNAME}}
+  password: {{PASSWORD}}
+}
+
+vars:pre-request {
+  USERNAME: admin
+  PASSWORD: admin
+}
+
+script:post-response {
+  let data = res.getHeader("set-cookie");
+  bru.setVar("Cookie", data);
+}
+
+docs {
+  ## Description
+  
+  This route is used to authenticate users and generate a session ID stored in a cookie named "session," allowing authorized access to perform various operations within the panel.
+  
+  ## Note
+  
+  - Retrieve the generated session ID from the cookie named "session".
+      
+  - Ensure the provided credentials (`username` and `password`) are correct for successful authentication.
+      
+  - Handle any potential errors or failure messages returned in the response.
+}

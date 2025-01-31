@@ -1,0 +1,46 @@
+meta {
+  name: Update Client
+  type: http
+  seq: 11
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/panel/api/inbounds/updateClient/{{uuid}}
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+  ~Cookie: 
+}
+
+body:json {
+  {
+    "id": 1,
+    "settings": "{\"clients\": [{\"id\": \"bbfad557-28f2-47e5-9f3d-e3c7f532fbda\",\"flow\": \"\",\"email\": \"sbhmrsmz\",\"limitIp\": 0,\"totalGB\": 10737418240,\"expiryTime\": 1729073736270,\"enable\": true,\"tgId\": \"\",\"subId\": \"z70791vpexfxw57h\",\"reset\": 0}]}"
+  }
+}
+
+vars:pre-request {
+  uuid: bbfad557-28f2-47e5-9f3d-e3c7f532fbda
+}
+
+docs {
+  ## Description
+  
+  This route is used to update an existing client identified by its UUID (`{uuid}`) within a specific inbound.
+  
+  ## **Path Parameter**
+  
+  - `{uuid}` : Unique identifier (UUID) of the specific client for whom information is being updated.
+      
+  
+  ## Note
+  
+  - Requires a valid session ID (from the login endpoint). Include the session ID stored in the cookie named "session" for authorization.
+      
+  - Verify that the provided `{uuid}` corresponds to an existing client within the system associated with the specified inbound.
+  - Format the client information in the `settings` parameter as a stringified JSON format within the request body.
+  - Handle any potential errors or failure messages returned in the response.
+}

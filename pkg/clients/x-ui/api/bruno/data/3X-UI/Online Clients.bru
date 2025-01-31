@@ -1,0 +1,11 @@
+meta {
+  name: Online Clients
+  type: http
+  seq: 19
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/panel/api/inbounds/onlines
+  body: multipartForm
+  auth: none
+}

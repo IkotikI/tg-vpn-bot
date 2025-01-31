@@ -1,0 +1,28 @@
+meta {
+  name: Reset traffics of all inbounds
+  type: http
+  seq: 13
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/panel/api/inbounds/resetAllTraffics
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  ## Description
+  
+  This route is used to reset the traffic statistics for all inbounds within the system.
+  
+  ## Note
+  
+  - Requires a valid session ID (from the login endpoint). Include the session ID stored in the cookie named "session" for authorization.
+      
+  - Resetting the traffics through this endpoint affects the statistics for all inbounds within the system.
+  - Handle any potential errors or failure messages returned in the response.
+}

@@ -1,0 +1,34 @@
+meta {
+  name: Reset traffics of all clients in an inbound
+  type: http
+  seq: 14
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/panel/api/inbounds/resetAllClientTraffics/{inboundId}
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  ## Description
+  
+  This route is used to reset the traffic statistics for all clients associated with a specific inbound identified by its ID (`{inboundId}`).
+  
+  ## Path Parameter
+  
+  - `{inboundId}` : Identifier of the specific inbound for which client traffics are being reset.
+      
+  
+  ## Note
+  
+  - Requires a valid session ID (from the login endpoint). Include the session ID stored in the cookie named "session" for authorization.
+      
+  - Resetting the client traffics through this endpoint affects all clients associated with the specified inbound.
+  - Verify that the provided `{inboundId}` corresponds to an existing inbound within the system.
+  - Handle any potential errors or failure messages returned in the response.
+}

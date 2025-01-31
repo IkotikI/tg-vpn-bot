@@ -1,0 +1,47 @@
+meta {
+  name: Add Inbound
+  type: http
+  seq: 8
+}
+
+post {
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/panel/api/inbounds/add
+  body: json
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+body:json {
+  {
+  "up": 0,
+  "down": 0,
+  "total": 0,
+  "remark": "New",
+  "enable": true,
+  "expiryTime": 0,
+  "listen": "",
+  "port": 55422,
+  "protocol": "vless",
+  "settings": "{\"clients\": [{\"id\": \"b86c0cdc-8a02-4da4-8693-72ba27005587\",\"flow\": \"\",\"email\": \"nt3wz904_2\",\"limitIp\": 0,\"totalGB\": 0,\"expiryTime\": 0,\"enable\": true,\"tgId\": \"\",\"subId\": \"rqv5zw1ydutamcp0\",\"reset\": 0}],\"decryption\": \"none\",\"fallbacks\": []}",
+  "streamSettings": "{\"network\": \"tcp\",\"security\": \"reality\",\"externalProxy\": [],\"realitySettings\": {\"show\": false,\"xver\": 0,\"dest\": \"yahoo.com:443\",\"serverNames\": [\"yahoo.com\",\"www.yahoo.com\"],\"privateKey\": \"wIc7zBUiTXBGxM7S7wl0nCZ663OAvzTDNqS7-bsxV3A\",\"minClient\": \"\",\"maxClient\": \"\",\"maxTimediff\": 0,\"shortIds\": [\"47595474\",\"7a5e30\",\"810c1efd750030e8\",\"99\",\"9c19c134b8\",\"35fd\",\"2409c639a707b4\",\"c98fc6b39f45\"],\"settings\": {\"publicKey\": \"2UqLjQFhlvLcY7VzaKRotIDQFOgAJe1dYD1njigp9wk\",\"fingerprint\": \"random\",\"serverName\": \"\",\"spiderX\": \"/\"}},\"tcpSettings\": {\"acceptProxyProtocol\": false,\"header\": {\"type\": \"none\"}}}",
+  "sniffing": "{\"enabled\": true,\"destOverride\": [\"http\",\"tls\",\"quic\",\"fakedns\"],\"metadataOnly\": false,\"routeOnly\": false}",
+  "allocate": "{\"strategy\": \"always\",\"refresh\": 5,\"concurrency\": 3}"
+  }
+}
+
+docs {
+  ## Description
+  
+  This route is used to add a new inbound configuration.
+  
+  ## Note
+  
+  - Requires a valid session ID (from the login endpoint), Include the session ID stored in the cookie named "session" for authorization.
+      
+  - Ensure the provided inbound configuration parameters are correct to add the inbound successfully.
+  - Ensure that sub-arrays or objects within the JSON body are stringified in JSON format for correct parsing by the panel.
+  - Handle any potential errors or failure messages returned in the response.
+}

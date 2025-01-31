@@ -1,0 +1,29 @@
+meta {
+  name: Inbounds
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/panel/api/inbounds/list
+  body: none
+  auth: none
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  ## Description
+  
+  This route is used to retrieve a comprehensive list of all inbounds along with their associated client options and statistics.
+  
+  ## Note
+  
+  - Requires a valid session ID (from the login endpoint), Include the session ID stored in the cookie named "session" for authorization.
+      
+  - If no inbounds are available, the response will contain an empty array `[]`.
+      
+  - Handle any potential errors or failure messages returned in the response.
+}
