@@ -1,0 +1,16 @@
+@config "../../tailwind.config.ts";
+@import "tailwindcss";
+/* @import "tailwindcss/utilities";
+@import "tailwindcss/components";
+@import "tailwindcss/base"; */
+
+/* @plugin "franken-ui"; */
+
+body {
+    margin: 0;
+    line-height: inherit;
+    background-color: hsl(var(--background));
+    font-family: Geist Sans, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", Segoe UI Symbol, "Noto Color Emoji";
+    color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+}

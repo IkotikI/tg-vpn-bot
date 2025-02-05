@@ -1,0 +1,22 @@
+package views
+
+templ Index(view templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en" class="dark uk-theme-zinc">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>Admin Panel</title>
+			<link rel="stylesheet" href="public/css/main.css"/>
+			<link rel="stylesheet" href="https://unpkg.com/franken-ui@1.1.0/dist/css/core.min.css"></link>
+			<script src="https://unpkg.com/htmx.org@2.0.4"></script>
+			<script src="https://unpkg.com/franken-ui@1.1.0/dist/js/core.iife.js" type="module"></script>
+			<script src="https://unpkg.com/franken-ui@1.1.0/dist/js/icon.iife.js" type="module"></script>
+		</head>
+		<body>
+			<div id="app" class="min-h-screen">
+				@view
+			</div>
+		</body>
+	</html>
+}

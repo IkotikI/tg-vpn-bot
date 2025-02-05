@@ -1,0 +1,42 @@
+package views
+
+import http "net/http"
+import templates "vpn-tg-bot/web/admin_panel/views/templates"
+
+func UI_Default() map[string]templ.Component {
+    return map[string]templ.Component{
+        "header": templates.DefaultHeader(),
+        "left-sidebar": templates.DefaultLeftSidebar(),
+        "main": templates.DefaultMain(),
+        "right-sidebar": templates.DefaultRightSidebar(),
+        "footer": templates.DefaultFooter(),
+    }
+}
+// UI represent default UI layout.
+// It contains header, left-sidebar, main, right-sidebar and footer.
+// You can specify template for each part of layout, or use default
+// template via function UI_Default() and change only needed parts.
+
+templ UI(r *http.Request, args map[string]templ.Component) {
+    if header, ok := args["header"]; ok {
+        @header
+    }
+    if leftSidebar, ok := args["left-sidebar"]; ok {
+        <aside id="left-sidebar">
+            @leftSidebar
+        </aside>
+    }
+    if main, ok := args["main"]; ok {
+        <main>
+            @main
+        </main>
+    }
+    if rightSidebar, ok := args["right-sidebar"]; ok {
+        <aside id="right-sidebar">
+            @rightSidebar
+        </aside>
+    }
+    if footer, ok := args["footer"]; ok {
+        @footer
+    }
+}
