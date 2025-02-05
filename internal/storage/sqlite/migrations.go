@@ -31,9 +31,9 @@ func (s *SQLStorage) createServersTable() error {
 	return err
 }
 
-func (s *SQLStorage) createUsersServersTable() error {
+func (s *SQLStorage) createSubscriptionsTable() error {
 	_, err := s.db.Exec(`
-        CREATE TABLE IF NOT EXISTS users_servers (
+        CREATE TABLE IF NOT EXISTS subscriptions (
             user_id INTEGER,
             server_id INTEGER,
             subscription_status TEXT, /* active | inactive */

@@ -36,7 +36,7 @@ func (s *SQLStorage) Init() error {
 		return e.Wrap("can't create servers table", err)
 	}
 
-	if err := s.createUsersServersTable(); err != nil {
+	if err := s.createSubscriptionsTable(); err != nil {
 		return e.Wrap("can't create users-servers table", err)
 	}
 

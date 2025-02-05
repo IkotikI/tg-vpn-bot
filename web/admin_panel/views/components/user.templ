@@ -1,8 +1,14 @@
-package templates
+package components
 
-import "vpn-tg-bot/internal/storage"
+import (
+    "vpn-tg-bot/web/admin_panel/entity"
+)
 
-templ User(user storage.User) {
+templ UserRow(user entity.UserWithSubscription) {
 	Hello World!
-	{ user.TelegramName }
+    <tr>
+        <td>{ user.ID.String() }</td>
+		<td>{ user.TelegramName }</td>
+        <td>{ user.CreatedAt.Format("02.01.2006 15:04") }</td>
+    </tr>
 }

@@ -1,19 +1,25 @@
 package templates
 
 import (
-	"vpn-tg-bot/internal/storage"
-	components "vpn-tg-bot/web/admin_panel/components"
+	components "vpn-tg-bot/web/admin_panel/views/components"
+	"vpn-tg-bot/web/admin_panel/entity"
 )
 
-templ Users(users *[]storage.User) {
-	<ul>
+templ UsersTable(users *[]entity.UserWithSubscription) {
+	<table class="uk-table uk-table-divider uk-table-hover">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Telegram Name</th>
+				<th>Created At</th>
+			</tr>
+		</thead>
+		<tbody>
 		for _, user := range *users {
-			<li>
-				@components.User(user)
-				// @Test()
-			</li>
+				@components.UserRow(user)
 		}
-	</ul>
+		</tbody>
+  </table>
 }
 
 templ Test() {

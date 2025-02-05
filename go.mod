@@ -10,4 +10,9 @@ require (
 	gopkg.in/telebot.v4 v4.0.0-beta.4
 )
 
-require github.com/a-h/templ v0.3.819 // indirect
+require (
+	github.com/a-h/templ v0.3.819 // indirect
+	github.com/gorilla/mux v1.8.1 // indirect
+	github.com/gorilla/securecookie v1.1.2 // indirect
+	github.com/gorilla/sessions v1.4.0 // indirect
+)

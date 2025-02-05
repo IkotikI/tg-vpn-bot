@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strconv"
 	"time"
 )
 
@@ -19,6 +20,18 @@ type Storage interface {
 type TelegramID int64
 type UserID int64
 type ServerID int64
+
+func (id TelegramID) String() string {
+	return strconv.FormatInt(int64(id), 10)
+}
+
+func (id UserID) String() string {
+	return strconv.FormatInt(int64(id), 10)
+}
+
+func (id ServerID) String() string {
+	return strconv.FormatInt(int64(id), 10)
+}
 
 /* ---- Errors ---- */
 var ErrNoSuchUser = errors.New("no such user")
@@ -132,10 +145,35 @@ type Subscriptions interface {
 	RemoveSubscriptionByID(ctx context.Context, userID UserID, serverID ServerID) error
 }
 
+/* ---- Countries Interface ---- */
+// Represent Country
+type Country struct {
+	CountryID int64  `db:"country_id"`
+	Name      string `db:"country_name"`
+	Flag      string `db:"country_flag"`
+}
+
 /* ---- SQLCompatible ---- */
 // SQLCompatible interface, which allows to use full power of SQL Queries, by the cost of breaking encapsulation.
 // SQL language can have difference between different databases, so recommend to use *sql.DB.DriverName()
 // to identify concrete database driver under the interface.
 type SQLCompatible interface {
 	SQLStorageInstance() (*sql.DB, error)
+}
+
+// type SQLStorage struct {
+// 	db *sql.DB
+// }
+
+// func NewSQLStorage(db *sql.DB) *SQLStorage {
+// 	return &SQLStorage{db: db}
+// }
+
+// func (s *SQLStorage) SQLStorageInstance() (*sql.DB, error) {
+// 	return s.db, nil
+// }
+
+type SQLStorage interface {
+	Storage
+	SQLCompatible
 }
