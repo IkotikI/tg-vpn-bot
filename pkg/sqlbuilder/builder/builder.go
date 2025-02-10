@@ -13,15 +13,11 @@ import (
 // 	return dest
 // }
 
-var partOrder = []string{"select", "from", "where", "group_by", "order_by", "limit"}
-
 type Builder interface {
-	BuildSelect([]string) string
-	BuildFrom(string) string
-	BuildWhere([]Where) string
-	BuildGroupBy(string) string
-	BuildOrderBy(OrderBy) string
-	BuildLimit(Limit) string
+	// Build(Arguments) (string, []interface{})
+	// BuildParts([]string, Arguments) (string, []interface{})
+	SelectBuilder
+	InsertBuilder
 }
 
 type SQLBuilder struct {
@@ -34,19 +30,16 @@ type SQLBuilder struct {
 // }
 
 type Arguments interface {
-	BuildPartByName(partName string, b *SQLBuilder) string
+	BuildPartByName(partName string, b Builder) (q string, args []interface{})
+	PartOrder() []string
 }
 
-type SelectArguments struct {
-	Arguments
+/* ---- Basic types ---- */
+type Column string
 
-	Select  []string
-	From    string
-	Where   []Where
-	GroupBy string
-	OrderBy OrderBy
-	Limit   Limit
-}
+type Table string
+
+type Value string
 
 type Where struct {
 	Column   string
@@ -59,47 +52,44 @@ type Limit struct {
 	Limit  int64
 }
 
+type GroupBy string
+
 type OrderBy struct {
 	Column string
 	Order  string
 }
 
-func (b *SQLBuilder) BuildParts(parts []string, a Arguments) string {
+func (b *SQLBuilder) BuildParts(parts []string, a Arguments) (string, []interface{}) {
+	if a == nil {
+		return "", nil
+	}
 	queryParts := make([]string, len(parts))
-	for _, partPositionedName := range partOrder {
+	sqlArgs := make([]interface{}, 0)
+	var tempArgs []interface{}
+	for _, partPositionedName := range a.PartOrder() {
 		for i, partGivenName := range parts {
-			if partGivenName == partPositionedName {
-				queryParts[i] = a.BuildPartByName(partGivenName, b)
+			if partGivenName == partPositionedName || partGivenName == partPositionedName+"s" {
+				queryParts[i], tempArgs = a.BuildPartByName(partGivenName, b.Builder)
+				if tempArgs != nil {
+					sqlArgs = append(sqlArgs, tempArgs...)
+				}
 			}
 		}
 	}
 
-	return strings.Join(queryParts, " ")
+	return strings.Join(queryParts, " "), sqlArgs
 }
 
-func (a *SelectArguments) BuildPartByName(partName string, b *SQLBuilder) string {
-	switch partName {
-	case "select":
-		return b.Builder.BuildSelect(a.Select)
-	case "from":
-		return b.Builder.BuildFrom(a.From)
-	case "where":
-		return b.Builder.BuildWhere(a.Where)
-	case "group_by":
-		return b.Builder.BuildGroupBy(a.GroupBy)
-	case "order_by":
-		return b.Builder.BuildOrderBy(a.OrderBy)
-	case "limit":
-		return b.Builder.BuildLimit(a.Limit)
-	default:
-		return ""
+func (b *SQLBuilder) Build(a Arguments) (string, []interface{}) {
+	if a == nil {
+		return "", nil
 	}
-}
-
-func (b *SQLBuilder) BuildAll(a Arguments) string {
-	queryParts := make([]string, len(partOrder))
-	for i, partName := range partOrder {
-		queryParts[i] = a.BuildPartByName(partName, b)
+	queryParts := make([]string, len(a.PartOrder()))
+	sqlArgs := make([]interface{}, 0)
+	tempArgs := make([]interface{}, 0)
+	for i, partName := range a.PartOrder() {
+		queryParts[i], tempArgs = a.BuildPartByName(partName, b.Builder)
+		sqlArgs = append(sqlArgs, tempArgs...)
 	}
-	return strings.Join(queryParts, " ")
+	return strings.Join(queryParts, " "), sqlArgs
 }

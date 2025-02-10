@@ -133,16 +133,19 @@ type ServerAuthorizations interface {
 /* ---- Subscriptions Interface ---- */
 // Represent Subscription of VPN User to VPN Server
 type Subscription struct {
-	UserID                int64     `db:"user_id"`
-	ServerID              int64     `db:"server_id"`
+	UserID                UserID    `db:"user_id"`
+	ServerID              ServerID  `db:"server_id"`
 	SubscriptionStatus    string    `db:"subscription_status"`
 	SubscriptionExpiredAt time.Time `db:"subscription_expired_at"`
 }
 
 // Subscriptions interface, that includes methods to work with Subscription data.
 type Subscriptions interface {
-	UpdateSubscription(ctx context.Context, subscription *Subscription) error
-	RemoveSubscriptionByID(ctx context.Context, userID UserID, serverID ServerID) error
+	SaveSubscription(ctx context.Context, subscription *Subscription) error
+	RemoveSubscriptionByIDs(ctx context.Context, userID UserID, serverID ServerID) error
+	GetSubscriptionsByUserID(ctx context.Context, userID UserID) (*[]Subscription, error)
+	GetSubscriptionsServerID(ctx context.Context, serverID ServerID) (*[]Subscription, error)
+	GetSubscriptionByIDs(ctx context.Context, userID UserID, serverID ServerID) (*Subscription, error)
 }
 
 /* ---- Countries Interface ---- */

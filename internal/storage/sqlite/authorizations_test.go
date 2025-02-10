@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 	"vpn-tg-bot/internal/storage"
+	"vpn-tg-bot/pkg/structconv"
 )
 
 func TestSaveGetDeleteAuthorization(t *testing.T) {
@@ -55,7 +56,7 @@ func TestSaveGetDeleteAuthorization(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = compareStructs(auth, testAuth, []string{"ServerID", "Username", "Password", "Token", "ExpiredAt", "Meta"}); err != nil {
+	if err = structconv.CompareStructs(auth, testAuth, []string{"ServerID", "Username", "Password", "Token", "ExpiredAt", "Meta"}); err != nil {
 		t.Fatal(err)
 	}
 	t.Log(auth)

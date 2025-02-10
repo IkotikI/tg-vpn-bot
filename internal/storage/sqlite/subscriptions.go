@@ -3,18 +3,85 @@ package sqlite
 import (
 	"context"
 	"vpn-tg-bot/internal/storage"
+	"vpn-tg-bot/pkg/e"
 )
 
 /* ---- Interface implementation ---- */
 
-func (s *SQLStorage) UpdateSubscription(ctx context.Context, sub *storage.Subscription) error {
-	q := "INSERT INTO subscriptions (user_id, server_id, status, expired_at) VALUES (?, ?, ?, ?)"
-	_, err := s.db.ExecContext(ctx, q, sub.UserID, sub.ServerID, sub.SubscriptionStatus, sub.SubscriptionExpiredAt)
+/* ---- Writer Interface impoelementation ---- */
+
+func (s *SQLStorage) SaveSubscription(ctx context.Context, sub *storage.Subscription) (err error) {
+	defer func() { e.WrapIfErr("can't save subscription", err) }()
+
+	q := `
+		INSERT INTO subscriptions (user_id, server_id, subscription_status, subscription_expired_at)
+		VALUES (?, ?, ?, ?)
+		ON CONFLICT(user_id, server_id)
+		DO UPDATE SET 
+		subscription_status = excluded.subscription_status,
+		subscription_expired_at = excluded.subscription_expired_at
+	`
+
+	_, err = s.db.ExecContext(ctx, q, sub.UserID, sub.ServerID, sub.SubscriptionStatus, sub.SubscriptionExpiredAt)
+
+	// oldSub, err := s.GetSubscriptionByIDs(ctx, sub.UserID, sub.ServerID)
+
+	// if err == sql.ErrNoRows {
+	// 	q := `INSERT INTO subscriptions (user_id, server_id, subscription_status, subscription_expired_at) VALUES (?, ?, ?, ?)`
+	// 	_, err = s.db.ExecContext(ctx, q, sub.UserID, sub.ServerID, sub.SubscriptionStatus, sub.SubscriptionExpiredAt)
+	// 	if err != nil {
+	// 		return e.Wrap("can't execute query", err)
+	// 	}
+	// } else if err != nil {
+	// 	return e.Wrap("can't scan row", err)
+	// } else {
+	// 	q := `UPDATE subscriptions SET subscription_status = ?, subscription_expired_at = ? WHERE user_id = ? AND server_id = ?`
+	// 	_, err = s.db.ExecContext(ctx, q, sub.SubscriptionStatus, sub.SubscriptionExpiredAt, sub.UserID, sub.ServerID)
+	// 	if err != nil {
+	// 		return e.Wrap("can't execute query", err)
+	// 	}
+	// }
+
 	return err
 }
 
-func (s *SQLStorage) RemoveSubscriptionByID(ctx context.Context, userID storage.UserID, serverID storage.ServerID) error {
+func (s *SQLStorage) RemoveSubscriptionByIDs(ctx context.Context, userID storage.UserID, serverID storage.ServerID) (err error) {
+	defer func() { e.WrapIfErr("can't remove subscription by id", err) }()
+
 	q := `DELETE FROM subscriptions WHERE user_id = ? AND server_id = ?`
-	_, err := s.db.ExecContext(ctx, q, userID, serverID)
+
+	_, err = s.db.ExecContext(ctx, q, userID, serverID)
 	return err
+}
+
+/* ---- Reader Interface implementation ---- */
+
+func (s *SQLStorage) GetSubscriptionByIDs(ctx context.Context, userID storage.UserID, serverID storage.ServerID) (subscription *storage.Subscription, err error) {
+	defer func() { e.WrapIfErr("can't get subscription by user and server ids", err) }()
+
+	q := `SELECT * FROM subscriptions WHERE user_id = ? AND server_id = ? LIMIT 1`
+
+	subscription = &storage.Subscription{}
+	err = s.db.GetContext(ctx, subscription, q, userID, serverID)
+	return subscription, err
+}
+
+func (s *SQLStorage) GetSubscriptionsByUserID(ctx context.Context, userID storage.UserID) (subscriptions *[]storage.Subscription, err error) {
+	defer func() { e.WrapIfErr("can't get subscriptions by user id", err) }()
+
+	q := `SELECT * FROM subscriptions WHERE user_id = ?`
+
+	subscriptions = &[]storage.Subscription{}
+	err = s.db.SelectContext(ctx, subscriptions, q, userID)
+	return subscriptions, err
+}
+
+func (s *SQLStorage) GetSubscriptionsServerID(ctx context.Context, serverID storage.ServerID) (subscriptions *[]storage.Subscription, err error) {
+	defer func() { e.WrapIfErr("can't get subscriptions by user id", err) }()
+
+	q := `SELECT * FROM subscriptions WHERE server_id = ?`
+
+	subscriptions = &[]storage.Subscription{}
+	err = s.db.SelectContext(ctx, subscriptions, q, serverID)
+	return subscriptions, err
 }

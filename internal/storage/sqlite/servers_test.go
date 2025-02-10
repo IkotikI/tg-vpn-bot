@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 	"vpn-tg-bot/internal/storage"
+	"vpn-tg-bot/pkg/structconv"
 )
 
 func TestAddGetRemoveServers(t *testing.T) {
@@ -46,7 +47,7 @@ func TestAddGetRemoveServers(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = compareStructs(server, testServer, []string{"CountryID", "Name", "Protocol", "IPaddress", "Port", "Login", "Password"}); err != nil {
+	if err = structconv.CompareStructs(server, testServer, []string{"CountryID", "Name", "Protocol", "IPaddress", "Port", "Login", "Password"}); err != nil {
 		t.Fatal(err)
 	}
 

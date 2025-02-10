@@ -37,7 +37,8 @@ func (s *SQLStorage) createSubscriptionsTable() error {
             user_id INTEGER,
             server_id INTEGER,
             subscription_status TEXT, /* active | inactive */
-            subscription_expired_at TIMESTAMP
+            subscription_expired_at TIMESTAMP,
+            UNIQUE(user_id, server_id)
         )
     `)
 	return err
