@@ -12,5 +12,5 @@ vars:pre-request {
 }
 
 script:pre-request {
-  req.setHeader("Cookie", bru.getVar("Cookie")); 
+  req.setHeader("Cookie", bru.getVar("Cookie")+"");
 }

@@ -63,6 +63,7 @@ func (s *SQLStorage) GetUserByID(ctx context.Context, id storage.UserID) (user *
 
 func (s *SQLStorage) SaveUser(ctx context.Context, user *storage.User) (userID storage.UserID, err error) {
 	defer func() { e.WrapIfErr("can't save user", err) }()
+
 	var id int64
 
 	q := `SELECT * FROM users WHERE id = ? OR telegram_id = ? LIMIT 1`
@@ -72,15 +73,23 @@ func (s *SQLStorage) SaveUser(ctx context.Context, user *storage.User) (userID s
 
 	err = s.db.GetContext(ctx, oldUser, q, user.ID, user.TelegramID)
 	if err == sql.ErrNoRows {
+		if user.TelegramID == 0 {
+			return 0, errors.New("user with this id or telegram_id doesn't exist; creating new user require non-empty telegram_id")
+		}
 		q = `INSERT INTO users (telegram_id, telegram_name, created_at, updated_at) VALUES (?, ?, ?, ?)`
 
 		user.CreatedAt = time.Now()
 		user.UpdatedAt = user.CreatedAt
+
 		result, err = s.db.ExecContext(ctx, q, user.TelegramID, user.TelegramName, user.CreatedAt, user.UpdatedAt)
 		if err != nil {
 			return 0, e.Wrap("can't execute query", err)
 		}
+
 		id, err = result.LastInsertId()
+		if err != nil {
+			return 0, e.Wrap("can't get last inserted id", err)
+		}
 		userID = storage.UserID(id)
 		fmt.Println("INSERT query executed, id:", id)
 	} else if err != nil {
@@ -88,18 +97,23 @@ func (s *SQLStorage) SaveUser(ctx context.Context, user *storage.User) (userID s
 	} else {
 		q = `UPDATE users SET telegram_name = ?, updated_at = ? WHERE telegram_id = ?`
 
+		if user.TelegramName == "" {
+			user.TelegramName = oldUser.TelegramName
+		}
 		if user.UpdatedAt.IsZero() {
 			user.UpdatedAt = time.Now()
 		}
-		result, err = s.db.ExecContext(ctx, q, user.TelegramName, user.UpdatedAt, user.TelegramID)
+
+		result, err = s.db.ExecContext(ctx, q, user.TelegramName, user.UpdatedAt, oldUser.TelegramID)
 		if err != nil {
 			return 0, e.Wrap("can't execute query", err)
 		}
+
 		userID = oldUser.ID
 		fmt.Println("UPDATE query executed, id:", id)
 	}
 
-	return userID, err
+	return userID, nil
 }
 
 func (s *SQLStorage) RemoveUserByID(ctx context.Context, id storage.UserID) (err error) {

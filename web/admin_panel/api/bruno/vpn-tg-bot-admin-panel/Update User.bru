@@ -1,0 +1,31 @@
+meta {
+  name: Update User
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{scheme}}://{{host}}:{{port}}/user/{{id}}
+  body: formUrlEncoded
+  auth: none
+}
+
+body:json {
+  {
+    "id": 0,
+    "telegram_id": 101,
+    "telegram_name": "test_new",
+    "created_at": "0001-01-01T00:00:00Z",
+    "updated_at": "2025-02-18T12:05:41.6009256+03:00"
+  }
+}
+
+body:form-urlencoded {
+  id: {{id}}
+  telegram_id: 
+  telegram_name: test_new
+}
+
+vars:pre-request {
+  id: 11
+}

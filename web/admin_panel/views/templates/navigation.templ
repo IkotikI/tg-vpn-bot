@@ -1,13 +1,29 @@
 package templates
 
-templ MainNavigation() {
+import "strconv"
+
+templ MainNavigation(items []templ.Component) {
     <nav class="h-20">
         <ul class="main-nav [&>li]:leading-20 gap-2 text-2xl flex">
-            <li>Home</li>
-            <li>Users</li>
-            <li>Servers</li>
-            <li>Tools</li>
+        for i, item := range items {
+            <li class={"menu-item-"+strconv.Itoa(i)} hx-boost="true">@item</li>
+        }
         </ul>
     </nav>
 }
 
+
+templ MenuItem(link templ.SafeURL, name string) {
+    <a href={link}>{ name }</a>
+}
+
+templ NestedMenuItem(link templ.SafeURL, name string, items []templ.Component) {
+    <a href={link}>
+        { name }
+        <ul>
+        for i, item := range items {
+            <li class={"menu-subitem-"+strconv.Itoa(i)}>@item</li>
+        }
+        </ul>
+    </a>
+}

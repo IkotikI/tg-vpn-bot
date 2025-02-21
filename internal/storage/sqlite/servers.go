@@ -77,6 +77,9 @@ func (s *SQLStorage) SaveServer(ctx context.Context, server *storage.VPNServer) 
 			return 0, e.Wrap("can't execute query", err)
 		}
 		id, err = result.LastInsertId()
+		if err != nil {
+			return 0, e.Wrap("can't get last inserted id", err)
+		}
 		fmt.Println("INSERT query executed, id:", id)
 		serverID = storage.ServerID(id)
 	} else if err != nil {
@@ -84,9 +87,8 @@ func (s *SQLStorage) SaveServer(ctx context.Context, server *storage.VPNServer) 
 	} else {
 		q = `UPDATE servers SET country_id = ?, name = ?, protocol = ?, host = ?, port = ?, username = ?, password = ?, updated_at = ? WHERE id = ?`
 
-		if server.UpdatedAt.IsZero() {
-			server.UpdatedAt = time.Now()
-		}
+		server.ParseDefaultsFrom(oldServer)
+
 		result, err = s.db.ExecContext(ctx, q, server.CountryID, server.Name, server.Protocol, server.Host, server.Port, server.Username, server.Password, server.UpdatedAt, server.ID)
 		if err != nil {
 			return 0, e.Wrap("can't execute query", err)

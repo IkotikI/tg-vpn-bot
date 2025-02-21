@@ -1,0 +1,35 @@
+package templates 
+
+import "strings"
+
+templ InlineToolbar(items []templ.Component) {
+	<div class="flex">
+		for _, item := range items {
+			@item
+		}
+	</div>
+}
+
+templ DotsMenu(items []templ.Component) {
+	<button
+		class="uk-icon-button uk-icon-button-xsmall"
+		aria-haspopup="true"
+	>
+		<span class="size-4">
+			<uk-icon icon="ellipsis"></uk-icon>
+		</span>
+		<div class="uk-drop uk-dropdown" uk-dropdown="mode: click">
+			<ul class="uk-dropdown-nav uk-nav">
+				<li><a class="uk-drop-close justify-between" href="#demo" uk-toggle="" role="button">Edit</a></li>
+				<li><a class="uk-drop-close justify-between" href="#demo" uk-toggle="" role="button">Edit</a></li>
+				<li class="uk-nav-divider"></li>
+				<li><a class="uk-drop-close justify-between" href="#demo" uk-toggle="" role="button">Edit</a></li>
+			</ul>
+		</div>
+	</button>
+}
+
+templ FlagIcon(code string) {
+	{{ code = strings.ToLower(code) }}
+	<span class={ "fi fis fi-" + code }></span>
+}

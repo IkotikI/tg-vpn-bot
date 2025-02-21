@@ -22,6 +22,7 @@ func TestAddInbound(t *testing.T) {
 	// Add Inbound
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	var inboundToAdd model.Inbound = DefaultInbound
+	// inboundToAdd.Id = 1
 	inbound, err := xui.AddInbound(ctx, &inboundToAdd)
 	if err != nil {
 		t.Fatalf("can't add inbound: %s", err)

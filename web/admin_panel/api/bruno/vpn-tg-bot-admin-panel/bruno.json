@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "VPN TG Bot Admin Panel",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

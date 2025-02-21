@@ -70,7 +70,7 @@ func (b *SQLiteBuilder) BuildOrderBy(o builder.OrderBy) (string, []interface{}) 
 	} else {
 		order = o.Order
 	}
-	return "ORDER BY ? ?", []interface{}{o.Column, order}
+	return spf("ORDER BY %s %s", o.Column, order), []interface{}{}
 }
 
 func (b *SQLiteBuilder) BuildLimit(l builder.Limit) (string, []interface{}) {

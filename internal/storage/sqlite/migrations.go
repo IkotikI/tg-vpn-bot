@@ -5,9 +5,9 @@ func (s *SQLStorage) createUsersTable() error {
 		CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             telegram_id TEXT NOT NULL,
-            telegram_name TEXT,
-            created_at TIMESTAMP,
-            updated_at TIMESTAMP
+            telegram_name TEXT NOT NULL,
+            created_at TIMESTAMP NOT NULL,
+            updated_at TIMESTAMP NOT NULL
         )
     `)
 	return err
@@ -19,13 +19,13 @@ func (s *SQLStorage) createServersTable() error {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             country_id INTEGER, /* ? */
             name TEXT NOT NULL,
-            protocol TEXT,
-            host TEXT,
-            port INTEGER,
-            username TEXT,
-            password TEXT,
-            created_at TIMESTAMP,
-            updated_at TIMESTAMP
+            protocol TEXT NOT NULL,
+            host TEXT NOT NULL,
+            port INTEGER NOT NULL,
+            username TEXT NOT NULL,
+            password TEXT NOT NULL,
+            created_at TIMESTAMP NOT NULL,
+            updated_at TIMESTAMP NOT NULL
         )
     `)
 	return err
@@ -34,10 +34,10 @@ func (s *SQLStorage) createServersTable() error {
 func (s *SQLStorage) createSubscriptionsTable() error {
 	_, err := s.db.Exec(`
         CREATE TABLE IF NOT EXISTS subscriptions (
-            user_id INTEGER,
-            server_id INTEGER,
-            subscription_status TEXT, /* active | inactive */
-            subscription_expired_at TIMESTAMP,
+            user_id INTEGER NOT NULL,
+            server_id INTEGER NOT NULL,
+            subscription_status TEXT NOT NULL, /* active | inactive */
+            subscription_expired_at TIMESTAMP NOT NULL,
             UNIQUE(user_id, server_id)
         )
     `)
@@ -47,9 +47,9 @@ func (s *SQLStorage) createSubscriptionsTable() error {
 func (s *SQLStorage) createCountriesTable() error {
 	_, err := s.db.Exec(`
         CREATE TABLE IF NOT EXISTS countries (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            icon TEXT
+            country_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            country_name TEXT NOT NULL,
+            country_code TEXT NOT NULL
         )
     `)
 	return err
@@ -59,11 +59,11 @@ func (s *SQLStorage) createServersAuthorizationsTable() error {
 	_, err := s.db.Exec(`
         CREATE TABLE IF NOT EXISTS servers_authorizations (
             server_id INTEGER PRIMARY KEY,
-            username TEXT,
-            password TEXT,
-            token TEXT,
-            expired_at TIMESTAMP,
-            meta TEXT
+            username TEXT NOT NULL,
+            password TEXT NOT NULL,
+            token TEXT NOT NULL,
+            expired_at TIMESTAMP NOT NULL,
+            meta TEXT NOT NULL
         )
     `)
 	return err

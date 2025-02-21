@@ -1,0 +1,10 @@
+package views
+
+import "strconv"
+
+templ Error(code int, message string) {
+    <div class="flex align-center justify-center">
+        <h1 class="text-[100rem]">{ strconv.Itoa(code) }</h1>
+        <p class="text-3xl">{ message }</p>
+    </div>
+}

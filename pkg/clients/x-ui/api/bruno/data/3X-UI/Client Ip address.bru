@@ -5,13 +5,17 @@ meta {
 }
 
 post {
-  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/panel/api/inbounds/clientIps/{email}
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/panel/api/inbounds/clientIps/{{email}}
   body: none
   auth: none
 }
 
 headers {
   Accept: application/json
+}
+
+vars:pre-request {
+  email: test@example.com
 }
 
 docs {

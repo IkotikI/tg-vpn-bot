@@ -1,27 +1,58 @@
 package templates
 
-import (
-	components "vpn-tg-bot/web/admin_panel/views/components"
-	"vpn-tg-bot/web/admin_panel/entity"
-)
+import "vpn-tg-bot/web/admin_panel/entity"
 
-templ UsersTable(users *[]entity.UserWithSubscription) {
-	<table class="uk-table uk-table-divider uk-table-hover">
+templ UsersMain(users *[]entity.User) {
+	<form action="">
+		<div class="new-user-form">
+			<button class="new-user uk-button-default">New User</button>
+		</div>
+		@UsersTable(users)
+	</form>
+	<template class="template-user-row-form hidden">
+		@UserRowForm()
+	</template>
+}
+
+templ UsersTable(users *[]entity.User) {
+	<table id="main-table" class="users-table uk-table uk-table-divider uk-table-hover">
 		<thead>
 			<tr>
 				<th>ID</th>
+				<th>Telegram ID</th>
 				<th>Telegram Name</th>
 				<th>Created At</th>
+				<th>UpdatedAt</th>
+				<th></th>
 			</tr>
 		</thead>
 		<tbody>
-		for _, user := range *users {
-				@components.UserRow(user)
-		}
+			for _, user := range *users {
+				@UserRow(user)
+			}
 		</tbody>
-  </table>
+	</table>
 }
 
-templ Test() {
-	<div>Test</div>
+templ UserRow(user entity.User) {
+	{{ userLink := UserLinkT(user.ID) }}
+	<tr>
+		<td><a href={ userLink }>{ user.ID.String() }</a></td>
+		<td><a href={ userLink }>{ user.TelegramID.String() }</a></td>
+		<td><a href={ userLink }>{ user.TelegramName }</a></td>
+		<td>{ user.UpdatedAt.Format("02.01.2006 15:04") }</td>
+		<td>{ user.CreatedAt.Format("02.01.2006 15:04") }</td>
+		<td></td>
+	</tr>
+}
+
+templ UserRowForm() {
+	<tr>
+		<td><input type="text" name="[{{id}}]id" placeholder="id" disabled/></td>
+		<td><input type="text" name="[{{id}}]telegram_id" placeholder="telegram_id"/></td>
+		<td><input type="text" name="[{{id}}]telegram_name" placeholder="telegram_name"/></td>
+		<td><input type="text" name="[{{id}}]created_at" placeholder="created_at"/></td>
+		<td><input type="text" name="[{{id}}]updated_at" placeholder="updated_at"/></td>
+		<td></td>
+	</tr>
 }

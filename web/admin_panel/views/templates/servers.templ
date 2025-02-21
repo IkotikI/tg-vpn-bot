@@ -1,5 +1,48 @@
 package templates
 
-templ Servers() {
-	<div>"Test Servers"</div>
+import (
+	"strconv"
+	"strings"
+	"vpn-tg-bot/web/admin_panel/entity"
+)
+
+templ ServersTable(servers *[]entity.Server) {
+	<table class="uk-table uk-table-divider uk-table-hover">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Country ID</th>
+				<th>Name</th>
+				<th>Protocol</th>
+				<th>Host</th>
+				<th>Port</th>
+				<th>Username</th>
+				<th>Password</th>
+				<th>Created At</th>
+				<th>Updated At</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, server := range *servers {
+				@ServerRow(server)
+			}
+		</tbody>
+	</table>
+}
+
+templ ServerRow(server entity.Server) {
+	{{ serverLink := ServerLinkT(server.ID) }}
+	{{ flagID := strings.ToLower(server.CountryCode) }}
+	<tr>
+		<td><a href={ serverLink }>{ server.ID.String() }</a></td>
+		<td><span class={ "fi fis fi-" + flagID }></span>{ server.VPNServer.CountryID.String() } </td>
+		<td>{ server.Name }</td>
+		<td>{ server.Protocol }</td>
+		<td>{ server.Host }</td>
+		<td>{ strconv.Itoa(server.Port) }</td>
+		<td>{ server.Username }</td>
+		<td>{ server.Password }</td>
+		<td>{ server.CreatedAt.Format("02.01.2006 15:04") }</td>
+		<td>{ server.UpdatedAt.Format("02.01.2006 15:04") }</td>
+	</tr>
 }

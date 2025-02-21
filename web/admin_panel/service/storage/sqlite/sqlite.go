@@ -40,63 +40,145 @@ func New(storage storage.SQLStorage) *SQLiteStorageService {
 	}
 }
 
-func (s *SQLiteStorageService) GetUsersWithSubscription(ctx context.Context, args builder.Arguments) (users *[]entity.UserWithSubscription, err error) {
-	defer func() { e.WrapIfErr("can't get users with subscription", err) }()
+func (s *SQLiteStorageService) GetUsers(ctx context.Context, args builder.Arguments) (users *[]entity.User, err error) {
+	defer func() { e.WrapIfErr("can't get users", err) }()
 
-	q := `
-		SELECT * FROM users AS u
-		LEFT OUTER JOIN subscriptions AS us
-		ON u.id = us.user_id
-	`
+	q := `SELECT * FROM users`
 
-	qEnd, qArgs := s.builder.BuildParts([]string{"where", "order_by"}, args)
+	qEnd, qArgs := s.builder.BuildParts([]string{"where", "order_by", "limit"}, args)
 	q += qEnd
+	log.Printf("query: `%s` args: %+v", q, qArgs)
 
-	// Make slice of UsersWithSubscription with values, changed to sql.Null types.
-	_users := []entity.UserWithSubscription{}
-	rows, err := s.db.QueryxContext(ctx, q, qArgs...)
-	for rows.Next() {
-		user := entity.UserWithSubscription{}
-		err := structScanRowsWithNullFallback(rows, &user)
-		if err != nil {
-			log.Printf("[ERR] Can't scan user: %v", err)
-		}
-
-		_users = append(_users, user)
+	users = &[]entity.User{}
+	err = SelectContextWithNullFallback(ctx, s.db, users, q, qArgs...)
+	if err != nil {
+		return nil, err
 	}
-	users = &_users
 
-	return users, err
+	return users, nil
+
 }
 
-func (s *SQLiteStorageService) GetServersWithAuthorization(ctx context.Context, args builder.Arguments) (servers *[]entity.ServerWithAuthorization, err error) {
-	defer func() { e.WrapIfErr("can't get users with subscription", err) }()
+func (s *SQLiteStorageService) GetServers(ctx context.Context, args builder.Arguments) (servers *[]entity.Server, err error) {
+	defer func() { e.WrapIfErr("can't get users", err) }()
 
 	q := `
 		SELECT * FROM servers AS s
-		LEFT OUTER JOIN servers_authorizations AS sa
-		ON s.id = sa.server_id
+		JOIN countries AS c
+		ON s.country_id = c.country_id
 	`
 
-	qEnd, qArgs := s.builder.BuildParts([]string{"where", "order_by"}, args)
+	qEnd, qArgs := s.builder.BuildParts([]string{"where", "order_by", "limit"}, args)
 	q += qEnd
+	log.Printf("query: `%s` args: %+v", q, qArgs)
 
-	// servers = &[]entity.ServerWithAuthorization{}
-	// err = s.db.SelectContext(ctx, servers, q, qArgs...)
-	_servers := []entity.ServerWithAuthorization{}
-	rows, err := s.db.QueryxContext(ctx, q, qArgs...)
+	servers = &[]entity.Server{}
+	err = SelectContextWithNullFallback(ctx, s.db, servers, q, qArgs...)
+	if err != nil {
+		return nil, err
+	}
+
+	return servers, nil
+}
+
+func (s *SQLiteStorageService) GetEntityServerByID(ctx context.Context, id storage.ServerID) (server *entity.Server, err error) {
+	defer func() { e.WrapIfErr("can't get user by id", err) }()
+
+	q := `
+		SELECT * FROM servers AS s
+		JOIN countries AS c
+		ON s.country_id = c.country_id
+		WHERE id = ? LIMIT 1
+	`
+
+	server = &entity.Server{}
+
+	err = GetContextWithNullFallback(ctx, s.db, server, q, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return server, nil
+}
+
+func (s *SQLiteStorageService) GetSubscriptionsWithServersByUserID(ctx context.Context, user_id storage.UserID, args builder.Arguments) (subs *[]entity.SubscriptionWithServer, err error) {
+	defer func() { e.WrapIfErr("can't get users", err) }()
+
+	q := `
+		SELECT * FROM subscriptions AS sub
+		JOIN servers AS serv 
+		ON sub.server_id = serv.id
+		JOIN countries AS c
+		ON serv.country_id = c.country_id
+		WHERE sub.user_id = ?
+	`
+	qArgs := []interface{}{user_id}
+	qEnd, qArgsAdd := s.builder.BuildParts([]string{"order_by", "limit"}, args)
+	q += qEnd
+	qArgs = append(qArgs, qArgsAdd...)
+	log.Printf("query: `%s` args: %+v", q, qArgs)
+
+	subs = &[]entity.SubscriptionWithServer{}
+	err = SelectContextWithNullFallback(ctx, s.db, subs, q, qArgs...)
+	if err != nil {
+		return nil, err
+	}
+
+	return subs, nil
+}
+
+func (s *SQLiteStorageService) GetSubscriptionsWithUsersByServerID(ctx context.Context, server_id storage.ServerID, args builder.Arguments) (subs *[]entity.SubscriptionWithUser, err error) {
+	defer func() { e.WrapIfErr("can't get users", err) }()
+
+	q := `
+		SELECT * FROM subscriptions AS s
+		JOIN users AS u
+		ON s.user_id = u.id
+		WHERE s.server_id = ?
+	`
+
+	qArgs := []interface{}{server_id}
+	qEnd, qArgsAdd := s.builder.BuildParts([]string{"order_by", "limit"}, args)
+	q += qEnd
+	qArgs = append(qArgs, qArgsAdd...)
+	log.Printf("query: `%s` args: %+v", q, qArgs)
+
+	subs = &[]entity.SubscriptionWithUser{}
+	err = SelectContextWithNullFallback(ctx, s.db, subs, q, qArgs...)
+	if err != nil {
+		return nil, err
+	}
+
+	return subs, nil
+}
+
+func GetContextWithNullFallback[T any](ctx context.Context, db *sqlx.DB, dest *T, query string, args ...interface{}) (err error) {
+	row := db.QueryRowxContext(ctx, query, args...)
+	return structScanWithNullFallback(row, dest)
+}
+
+func SelectContextWithNullFallback[T any](ctx context.Context, db *sqlx.DB, dest *[]T, query string, args ...interface{}) (err error) {
+	rows, err := db.QueryxContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+	_values := *dest
 	for rows.Next() {
-		server := entity.ServerWithAuthorization{}
-		err := structScanRowsWithNullFallback(rows, &server)
+		value := *new(T)
+		err := structScanWithNullFallback(rows, &value)
 		if err != nil {
-			log.Printf("[ERR] Can't scan user: %v", err)
+			log.Printf("[ERR] Can't scan value: %v", err)
 		}
 
-		_servers = append(_servers, server)
+		_values = append(_values, value)
 	}
-	servers = &_servers
+	*dest = _values
+	// log.Printf("Type of selected values: %T, _values %+v", _values, _values)
+	return nil
+}
 
-	return servers, err
+type StructScannable interface {
+	StructScan(dest interface{}) error
 }
 
 // This function make support queries for Null fields in sql database, providing
@@ -104,8 +186,9 @@ func (s *SQLiteStorageService) GetServersWithAuthorization(ctx context.Context, 
 // replaces with sql.Null_. This behavior can affect performance and using for fallback,
 // not just for main functional of app. [WARINING] will be logged, when fallback
 // is used.
+// rows - pointer to sqlx.Row or sqlx.Rows
 // v - pointer to struct.
-func structScanRowsWithNullFallback(rows *sqlx.Rows, v interface{}) (err error) {
+func structScanWithNullFallback(rows StructScannable, v interface{}) (err error) {
 	err = rows.StructScan(v)
 	if err != nil {
 		log.Printf("[WARNING] Can't scan value: %v. Try to scan to sql.Null struct.", err)

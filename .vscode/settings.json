@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "securecookie",
+        "strconv",
         "templ"
     ],
     "editor.formatOnSave": false

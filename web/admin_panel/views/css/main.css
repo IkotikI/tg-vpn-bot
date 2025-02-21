@@ -14,3 +14,7 @@ body {
     color: hsl(var(--foreground));
     -webkit-font-smoothing: antialiased;
 }
+
+.uk-table .text-center th  {
+    text-align: center;
+}

@@ -1,0 +1,7 @@
+meta {
+  name: settings
+}
+
+script:pre-request {
+  req.setHeader("Cookie", bru.getVar("Cookie")+"");
+}

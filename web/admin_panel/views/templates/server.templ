@@ -1,0 +1,105 @@
+package templates
+
+import (
+	"strconv"
+	"vpn-tg-bot/web/admin_panel/entity"
+)
+
+templ ServerMain(server *entity.Server, subscriptions *[]entity.SubscriptionWithUser) {
+	<h1 class="text-3xl">
+		Server { server.Name }
+		@FlagIcon(server.CountryCode)
+	</h1>
+	<section class="server-profile flex">
+		<div class="server-info">
+			<form action="updateServer" id="form-server" hx-patch={ "/server/" + server.ID.String() } hx-target="#notification">
+				@ServerInfo(server)
+				<button type="submit" class="uk-button uk-button-default">Save</button>
+			</form>
+		</div>
+		<div class="server-subscriptions">
+			<h1>Subscriptions</h1>
+			@SubscriptionsWithUsersTable(subscriptions)
+		</div>
+	</section>
+}
+
+templ ServerInfo(server *entity.Server) {
+	<div class="p-2">
+		<label class="uk-form-label" for="id">ID</label>
+		<input class="uk-input" name="id" type="text" placeholder="ID" value={ server.ID.String() } disabled/>
+	</div>
+	<div class="p-2">
+		<label class="uk-form-label" for="country_id">
+			Country ID
+			@FlagIcon(server.CountryCode)
+		</label>
+		<input class="uk-input" name="country_id" type="text" placeholder="Country ID" value={ server.VPNServer.CountryID.String() }/>
+	</div>
+	<div class="p-2">
+		<label class="uk-form-label" for="name">Name</label>
+		<input class="uk-input" name="name" type="text" placeholder="Name" value={ server.Name }/>
+	</div>
+	<div class="p-2">
+		<label class="uk-form-label" for="protocol">Protocol</label>
+		<input class="uk-input" name="protocol" type="text" placeholder="Protocol" value={ server.Protocol }/>
+	</div>
+	<div class="p-2">
+		<label class="uk-form-label" for="host">Host</label>
+		<input class="uk-input" name="host" type="text" placeholder="Host" value={ server.Host }/>
+	</div>
+	<div class="p-2">
+		<label class="uk-form-label" for="port">Port</label>
+		<input class="uk-input" name="port" type="text" placeholder="Port" value={ strconv.Itoa(server.Port) }/>
+	</div>
+	<div class="p-2">
+		<label class="uk-form-label" for="username">Username</label>
+		<input class="uk-input" name="username" type="text" placeholder="Username" value={ server.Username }/>
+	</div>
+	<div class="p-2">
+		<label class="uk-form-label" for="password">Password</label>
+		<input class="uk-input" name="password" type="text" placeholder="Password" value={ server.Password }/>
+	</div>
+	<div class="p-2">
+		<label class="uk-form-label" for="created_at">Created At</label>
+		<input class="uk-input" name="created_at" type="text" placeholder="Created At" value={ server.CreatedAt.Format("02.01.2006 15:04") }/>
+	</div>
+	<div class="p-2">
+		<label class="uk-form-label" for="updated_at">Updated At</label>
+		<input class="uk-input" name="updated_at" type="text" placeholder="Updated At" value={ server.UpdatedAt.Format("02.01.2006 15:04") }/>
+	</div>
+}
+
+templ SubscriptionsWithUsersTable(subscriptions *[]entity.SubscriptionWithUser) {
+	<table id="user-subscriptions-table" class="users-table uk-table uk-table-divider uk-table-hover">
+		<thead>
+			<tr class="text-center">
+				<th class="border-r" colspan="3">User</th>
+				<th colspan="2">Subscriptions</th>
+			</tr>
+			<tr>
+				<th>ID</th>
+				<th>Telegram ID</th>
+				<th>Name</th>
+				<th>Status</th>
+				<th>Expired At</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, subscription := range *subscriptions {
+				@SubscriptionWithUserRow(subscription)
+			}
+		</tbody>
+	</table>
+}
+
+templ SubscriptionWithUserRow(s entity.SubscriptionWithUser) {
+	{{ userLink := UserLinkT(s.UserID) }}
+	<tr>
+		<td><a href={ userLink }>{ s.UserID.String() }</a></td>
+		<td><a href={ userLink }>{ s.TelegramID.String() }</a></td>
+		<td><a href={ userLink }>{ s.TelegramName }</a></td>
+		<td>{ s.SubscriptionStatus }</td>
+		<td>{ s.SubscriptionExpiredAt.Format("02.01.2006 15:04") }</td>
+	</tr>
+}

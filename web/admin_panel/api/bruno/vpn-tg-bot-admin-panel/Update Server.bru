@@ -1,0 +1,42 @@
+meta {
+  name: Update Server
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{scheme}}://{{host}}:{{port}}/server/{{id}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": 11,
+    "country_id": 50,
+    "name": "Example VPN Server",
+    "protocol": "OpenVPN",
+    "host": "vpn.example.com",
+    "port": 1194,
+    "username": "vpnuser",
+    "password": "vpnpassword",
+    "created_at": "2023-01-01T12:00:00Z",
+    "updated_at": "2023-01-02T12:00:00Z"
+  }
+}
+
+body:form-urlencoded {
+  id: {{id}}
+  name: bruh
+  protocol: http
+  host: new_host
+  port: 322
+  username: cat
+  password: cat22
+  created_at: 
+  updated_at: 
+}
+
+vars:pre-request {
+  id: 11
+}

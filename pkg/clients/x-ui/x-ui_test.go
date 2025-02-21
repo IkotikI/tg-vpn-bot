@@ -13,7 +13,7 @@ import (
 
 var testStoragePath = "../../../internal/storage/sqlite/test_data/db.db"
 
-var server = storage.VPNServer{
+var server = &storage.VPNServer{
 	ID:        1,
 	CountryID: 1,
 	Name:      "Local",

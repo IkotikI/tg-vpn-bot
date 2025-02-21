@@ -1,8 +1,17 @@
 package templates
 
-templ DefaultHeader() {
-    <header class="">
-        @MainNavigation()
+templ DefaultHeader(items map[string]templ.Component) {
+    <header>
+        if navigation, ok := items["navigation"]; ok {
+            @navigation   
+        } else {
+            @MainNavigation([]templ.Component{
+                    MenuItem("/", "Home"),
+                    MenuItem("/users", "Users"),
+                    MenuItem("/servers", "Server"),
+                    MenuItem("/tools", "Tools"),
+            })
+        }
     </header>
 }
 

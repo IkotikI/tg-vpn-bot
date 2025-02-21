@@ -6,8 +6,6 @@ import (
 	"testing"
 	"time"
 	"vpn-tg-bot/pkg/clients/x-ui/model"
-
-	"github.com/google/uuid"
 )
 
 var test_inboundID = 1
@@ -18,13 +16,43 @@ func TestAddClient(t *testing.T) {
 	xui := New(TokenKey_3x_ui, server, makeAuthStore())
 
 	client := &model.Client{
-		ID:         uuid.New().String(),
+		ID:         test_uuid,
 		Email:      test_email,
 		ExpiryTime: time.Now().Add(time.Hour * 24).Unix(),
 	}
 
+	bytes_test, err := xui.prepareClientPayload(test_inboundID, client)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("payload:\n%+v\n", string(bytes_test))
+
 	ctx, cancel := context.WithTimeout(context.Background(), 400*time.Millisecond)
-	err := xui.AddClient(ctx, test_inboundID, client)
+	err = xui.AddClient(ctx, test_inboundID, client)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cancel()
+	time.Sleep(time.Millisecond * 100)
+}
+
+func TestUpdateClient(t *testing.T) {
+	xui := New(TokenKey_3x_ui, server, makeAuthStore())
+
+	client := &model.Client{
+		ID:         test_uuid,
+		Email:      test_email,
+		ExpiryTime: time.Now().Add(time.Hour * 24).Unix(),
+	}
+
+	bytes_test, err := xui.prepareClientPayload(test_inboundID, client)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("payload:\n%+v\n", string(bytes_test))
+
+	ctx, cancel := context.WithTimeout(context.Background(), 400*time.Millisecond)
+	err = xui.UpdateClient(ctx, test_inboundID, client)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,7 +70,7 @@ func TestDeleteClient(t *testing.T) {
 		t.Fatal(err)
 	}
 	cancel()
-	fmt.Println("clietn deleted successfully")
+	fmt.Println("client deleted successfully")
 }
 
 func TestGetClientTraffic(t *testing.T) {

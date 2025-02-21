@@ -34,31 +34,6 @@ type Arguments interface {
 	PartOrder() []string
 }
 
-/* ---- Basic types ---- */
-type Column string
-
-type Table string
-
-type Value string
-
-type Where struct {
-	Column   string
-	Operator string
-	Value    string
-}
-
-type Limit struct {
-	Offset int64
-	Limit  int64
-}
-
-type GroupBy string
-
-type OrderBy struct {
-	Column string
-	Order  string
-}
-
 func (b *SQLBuilder) BuildParts(parts []string, a Arguments) (string, []interface{}) {
 	if a == nil {
 		return "", nil
@@ -93,3 +68,45 @@ func (b *SQLBuilder) Build(a Arguments) (string, []interface{}) {
 	}
 	return strings.Join(queryParts, " "), sqlArgs
 }
+
+/* ---- Basic types ---- */
+type Column string
+
+type Table string
+
+type Value string
+
+type Where struct {
+	Column   string
+	Operator string
+	Value    string
+}
+
+type Limit struct {
+	Offset int64
+	Limit  int64
+}
+
+type GroupBy string
+
+type OrderBy struct {
+	Column string
+	Order  string
+}
+
+/* ---- Parse ---- */
+
+// func (c *Column) ParseURLValues(args []string, default []string) {
+
+// 	if queryValue, ok := queryArgs[key]; ok {
+// 		v, err := strconv.Atoi(queryValue[0])
+// 			if err == nil {
+// 				args.Limit.Limit = v
+// 				continue
+// 			}
+// 		}
+// 	}
+
+// 	args.Limit.Limit = defaultArgs[key][0]
+
+// }

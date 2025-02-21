@@ -1,0 +1,50 @@
+package xui_service
+
+func (s *XUIService) SubscriptionLink() {
+
+	//./web/service/setting.go:565
+	if result["subEnable"].(bool) && (result["subURI"].(string) == "" || result["subJsonURI"].(string) == "") {
+		subURI := ""
+		subPort, _ := s.GetSubPort()
+		subPath, _ := s.GetSubPath()
+		subJsonPath, _ := s.GetSubJsonPath()
+		subDomain, _ := s.GetSubDomain()
+		subKeyFile, _ := s.GetSubKeyFile()
+		subCertFile, _ := s.GetSubCertFile()
+		subTLS := false
+		if subKeyFile != "" && subCertFile != "" {
+			subTLS = true
+		}
+		if subDomain == "" {
+			subDomain = strings.Split(host, ":")[0]
+		}
+		if subTLS {
+			subURI = "https://"
+		} else {
+			subURI = "http://"
+		}
+		if (subPort == 443 && subTLS) || (subPort == 80 && !subTLS) {
+			subURI += subDomain
+		} else {
+			subURI += fmt.Sprintf("%s:%d", subDomain, subPort)
+		}
+		if result["subURI"].(string) == "" {
+			result["subURI"] = subURI + subPath
+		}
+		if result["subJsonURI"].(string) == "" {
+			result["subJsonURI"] = subURI + subJsonPath
+		}
+	}
+
+
+	// ./web/html/xui/inbound_info_modal.html
+	// js
+	genSubLink(subID) {
+        return app.subSettings.subURI + subID;
+      },
+      genSubJsonLink(subID) {
+        return app.subSettings.subJsonURI + subID;
+      },
+	// js
+}
+

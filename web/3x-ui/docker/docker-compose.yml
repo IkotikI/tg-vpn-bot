@@ -4,6 +4,7 @@ services:
     container_name: 3x-ui
     ports: 
      - 2053:2053
+     - 2096:2096
     volumes:
       - db:/etc/x-ui/
       - cert:/root/cert/

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -22,6 +23,14 @@ const (
 	DeleteClientPath     = InboundsPrefix + "/{{.InboundID}}/delClient/{{.ClientID}}"
 )
 
+const (
+	ErrMsgRecordNotFound = "Something went wrong! Failed: record not found"
+)
+
+var (
+	ErrRecordNotFound = errors.New("record not found on remote server")
+)
+
 // var (
 //
 //	// Clients
@@ -29,16 +38,12 @@ const (
 //	ErrClientNotFound      = errors.New("client not found")
 //
 // )
-type ClientID uuid.UUID
+type ClientID = uuid.UUID
 
 func ParseClientID(s string) (cID ClientID, err error) {
 	defer func() { e.WrapIfErr("can't parse ClientID", err) }()
 	id, err := uuid.Parse(s)
 	return ClientID(id), err
-}
-
-func (c ClientID) String() string {
-	return uuid.UUID(c).String()
 }
 
 var ClientIDNil ClientID = ClientID(uuid.Nil)
@@ -84,6 +89,9 @@ func (c *XUIClient) AddClient(ctx context.Context, inboundID int, client *model.
 	}
 
 	if respStruct.Success == false {
+		if respStruct.Msg == ErrMsgRecordNotFound {
+			return ErrRecordNotFound
+		}
 		return fmt.Errorf("server responded with error: \"%s\"", respStruct.Msg)
 	}
 
@@ -98,8 +106,23 @@ func (c *XUIClient) UpdateClient(ctx context.Context, inboundID int, client *mod
 		return err
 	}
 
+	clientUUID, err := uuid.Parse(client.ID)
+	if err != nil {
+		return e.Wrap("can't parse clientID", err)
+	}
+
+	args := struct {
+		ClientID ClientID
+	}{
+		ClientID: ClientID(clientUUID),
+	}
+	path, err := c.PreparePath(UpdateClientPath, args)
+	if err != nil {
+		return e.Wrap("can't prepare path", err)
+	}
+
 	buffer := bytes.NewBuffer(payload)
-	resp, err := c.post(ctx, AddClientPath, buffer)
+	resp, err := c.post(ctx, path, buffer)
 	if err != nil {
 		return e.Wrap("can't send addClient request", err)
 	}
@@ -121,6 +144,9 @@ func (c *XUIClient) UpdateClient(ctx context.Context, inboundID int, client *mod
 	}
 
 	if respStruct.Success == false {
+		if respStruct.Msg == ErrMsgRecordNotFound {
+			return ErrRecordNotFound
+		}
 		return fmt.Errorf("server responded with error: \"%s\"", respStruct.Msg)
 	}
 
@@ -163,6 +189,9 @@ func (c *XUIClient) DeleteClient(ctx context.Context, inboundID int, clientID Cl
 	}
 
 	if respStruct.Success == false {
+		if respStruct.Msg == ErrMsgRecordNotFound {
+			return ErrRecordNotFound
+		}
 		return fmt.Errorf("server responded with error: \"%s\"", respStruct.Msg)
 	}
 

@@ -1,0 +1,11 @@
+meta {
+  name: Settings
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://{{HOST}}:{{PORT}}{{WEBBASEPATH}}/settings
+  body: none
+  auth: none
+}

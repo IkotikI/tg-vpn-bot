@@ -30,9 +30,9 @@ func TestCreateMockContent(t *testing.T) {
 	TestAddSubscriptions(t)
 }
 
-// func TestDropDB(t *testing.T) {
-// 	err := os.RemoveAll(path)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// }
+func TestDropDB(t *testing.T) {
+	err := os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}

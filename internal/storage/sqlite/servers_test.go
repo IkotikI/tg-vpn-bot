@@ -3,6 +3,7 @@ package sqlite
 import (
 	"context"
 	"fmt"
+	"math/rand/v2"
 	"strconv"
 	"testing"
 	"time"
@@ -87,7 +88,7 @@ func TestAddServers(t *testing.T) {
 	for i := 0; i < n; i++ {
 
 		testServer := &storage.VPNServer{
-			CountryID: int64(i),
+			CountryID: storage.CountryID(int64(i) + 7 + rand.Int64N(400)),
 			Name:      "test" + strconv.Itoa(i),
 			Protocol:  "test" + strconv.Itoa(i),
 			Host:      "test" + strconv.Itoa(i),
@@ -105,7 +106,7 @@ func TestAddServers(t *testing.T) {
 		}
 
 		fmt.Printf("added Server with id %d\n", id)
-		time.Sleep(time.Microsecond * 100)
+		// time.Sleep(time.Microsecond * 100)
 
 	}
 }

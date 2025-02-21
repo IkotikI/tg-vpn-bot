@@ -1,0 +1,82 @@
+package templates
+
+import (
+	"vpn-tg-bot/internal/storage"
+	"vpn-tg-bot/web/admin_panel/entity"
+)
+
+templ UserMain(user *storage.User, subscriptions *[]entity.SubscriptionWithServer) {
+	<h1 class="uk-h1">User <span class="uk-text-lighter">{ user.TelegramName }</span></h1>
+	<section class="user-profile flex">
+		<div class="user-info">
+			<form action="updateUser" id="form-user" hx-patch={ "/user/" + user.ID.String() } hx-target="#notification">
+				@UserInfo(user)
+				<button type="submit" class="uk-button uk-button-default">Save</button>
+			</form>
+		</div>
+		<div class="user-sub0scriptions">
+			<h1>Subscriptions</h1>
+			@SubscriptionsWithServersTable(subscriptions)
+		</div>
+	</section>
+}
+
+templ UserInfo(user *storage.User) {
+	<div class="p-4">
+		<label class="uk-form-label" for="id">ID</label>
+		<input class="uk-input" name="id" type="text" placeholder="ID" value={ user.ID.String() } disabled/>
+	</div>
+	<div class="p-4">
+		<label class="uk-form-label" for="telegram_id">Telegram ID</label>
+		<input class="uk-input" name="telegram_id" type="text" placeholder="Telegram ID" value={ user.TelegramID.String() }/>
+	</div>
+	<div class="p-4">
+		<label class="uk-form-label" for="telegram_name">Telegram Name</label>
+		<input class="uk-input" name="telegram_name" type="text" placeholder="Telegram Name" value={ user.TelegramName }/>
+	</div>
+	<div class="p-4">
+		<label class="uk-form-label" for="created_at">Created At</label>
+		<input class="uk-input" name="created_at" type="text" placeholder="Created At" value={ user.CreatedAt.Format("02.01.2006 15:04") }/>
+	</div>
+	<div class="p-4">
+		<label class="uk-form-label" for="updated_at">Updated Аt</label>
+		<input class="uk-input" name="updated_at" type="text" placeholder="Updated At" value={ user.UpdatedAt.Format("02.01.2006 15:04") }/>
+	</div>
+}
+
+templ SubscriptionsWithServersTable(subscriptions *[]entity.SubscriptionWithServer) {
+	<table id="user-subscriptions-table" class="users-table uk-table uk-table-divider uk-table-hover">
+		<thead>
+			<tr class="text-center">
+				<th class="border-r" colspan="3">Server</th>
+				<th colspan="2">Subscriptions</th>
+			</tr>
+			<tr>
+				<th>ID</th>
+				<th>Country</th>
+				<th>Name</th>
+				<th>Status</th>
+				<th>Expired At</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, subscription := range *subscriptions {
+				@SubscriptionWithServerRow(subscription)
+			}
+		</tbody>
+	</table>
+}
+
+templ SubscriptionWithServerRow(s entity.SubscriptionWithServer) {
+	{{ serverLink := ServerLinkT(s.ServerID) }}
+	<tr>
+		<td><a href={ serverLink }>{ s.ServerID.String() }</a></td>
+		<td>
+			@FlagIcon(s.CountryCode)
+			{ s.CountryCode }
+		</td>
+		<td><a href={ serverLink }>{ s.Name }</a></td>
+		<td>{ s.SubscriptionStatus }</td>
+		<td>{ s.SubscriptionExpiredAt.Format("02.01.2006 15:04") }</td>
+	</tr>
+}

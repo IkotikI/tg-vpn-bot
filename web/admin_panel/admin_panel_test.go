@@ -15,32 +15,7 @@ import (
 
 func TestRunUntilCancel(t *testing.T) {
 
-	envPath := "../../.env"
-
-	if err := godotenv.Load(envPath); err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
-	}
-
-	addr := os.Getenv("ADMIN_PANEL_ADDR")
-	if addr == "" {
-		addr = ":8088"
-	}
-
-	sessionKey := os.Getenv("ADMIN_PANEL_SESSION_KEY")
-	if sessionKey == "" && len(sessionKey) != 32 {
-		log.Fatalf("ADMIN_PANEL_SESSION_KEY is incorrect, value: %s", sessionKey)
-	}
-
-	storage, err := sqlite.New("../../internal/storage/sqlite/test_data/db.db")
-	if err != nil {
-		t.Fatalf("[ERR]: Can't create sqlite storage instance: %v", err)
-	}
-
-	s := Settings{
-		Addr:       addr,
-		Storage:    storage,
-		SessionKey: sessionKey,
-	}
+	s := getTestSettings(t)
 	p := New(s)
 
 	if err := p.Run(); err != nil {
@@ -55,11 +30,50 @@ func TestGenerateSessionKey(t *testing.T) {
 }
 
 func TestAssets(t *testing.T) {
-	p := New(Settings{Addr: ":8080", Storage: nil})
+	s := New(Settings{Addr: ":8080", Storage: nil})
 	d, err := os.Getwd()
-	fmt.Println("current dir: ", d, err)
-	err = debug.DisplayFileSystem(p.Assets())
+	t.Log("\n current dir: ", d, err)
+	err = debug.DisplayFileSystem(s.Assets())
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	// // err = s.collectFileMetadata()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// t.Logf("\n public assets meta: %+v \n", publicAssetsMeta)
+
+}
+
+const basePath = "../../"
+
+func getTestSettings(t *testing.T) Settings {
+	envPath := basePath + ".env"
+
+	if err := godotenv.Load(envPath); err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
+	addr := os.Getenv("ADMIN_PANEL_ADDR")
+	if addr == "" {
+		addr = ":8088"
+	}
+
+	sessionKey := os.Getenv("ADMIN_PANEL_SESSION_KEY")
+	if sessionKey == "" && len(sessionKey) != 32 {
+		t.Fatalf("ADMIN_PANEL_SESSION_KEY is incorrect, value: %s", sessionKey)
+	}
+
+	storage, err := sqlite.New(basePath + "internal/storage/sqlite/test_data/db.db")
+	if err != nil {
+		t.Fatalf("[ERR]: Can't create sqlite storage instance: %v", err)
+	}
+
+	return Settings{
+		Addr:       addr,
+		Scheme:     "http",
+		Storage:    storage,
+		SessionKey: sessionKey,
 	}
 }

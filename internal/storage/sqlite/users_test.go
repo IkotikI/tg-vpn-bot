@@ -18,7 +18,7 @@ func TestAddUsers(t *testing.T) {
 	time.Sleep(time.Millisecond * 200)
 
 	n := 10
-	for i := 0; i < n; i++ {
+	for i := 1; i <= n; i++ {
 
 		wantUser := &storage.User{
 			TelegramID:   storage.TelegramID(i),
@@ -34,7 +34,7 @@ func TestAddUsers(t *testing.T) {
 		}
 
 		fmt.Printf("added User with id %d\n", id)
-		time.Sleep(time.Microsecond * 100)
+		// time.Sleep(time.Microsecond * 100)
 
 	}
 }

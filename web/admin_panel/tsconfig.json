@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",                  // Output ECMAScript version (ES5, ES6, etc.)
+    "module": "ESNext",                  // Module system (for modern browsers, use ES6 or None)
+    "outDir": "./public/dest/js",         // Output directory for compiled JS files
+    "rootDir": "./views",                // Location of TypeScript source files
+    "allowJs": true,                   // Allow JavaScript files
+    "strict": true,                     // Enable strict type-checking
+    "sourceMap": true,                  // Generate source maps for debugging
+    "esModuleInterop": true,            // Allow default imports from CommonJS modules
+    "forceConsistentCasingInFileNames": true,
+    // "module": "none",
+  },
+  "include": ["views/index.ts", "views/**/*.ts"],
+  "exclude": ["node_modules"],
+}

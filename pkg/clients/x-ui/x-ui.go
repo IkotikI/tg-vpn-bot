@@ -28,6 +28,8 @@ type XUIClient struct {
 	token    string
 	TokenKey string
 
+	Settings *model.AllSetting
+
 	MaxRetry   int
 	httpClient *http.Client
 	authStore  storage.ServerAuthorizations
@@ -44,6 +46,7 @@ const (
 	LoginPath = "/login"
 	// Client
 	InboundsPrefix = "/panel/api/inbounds"
+	SettingPrefix  = "/panel/setting"
 	//Onlines
 	OnlinesPath = InboundsPrefix + "/onlines"
 )
@@ -54,7 +57,7 @@ const (
 )
 
 // New returns new XUIClient. TokenKey define, which key will be used to parse auth token from cookies.
-func New(tokenKey string, server storage.VPNServer, authStore storage.ServerAuthorizations) *XUIClient {
+func New(tokenKey string, server *storage.VPNServer, authStore storage.ServerAuthorizations) *XUIClient {
 	return &XUIClient{
 		serverID: server.ID,
 		Protocol: server.Protocol,

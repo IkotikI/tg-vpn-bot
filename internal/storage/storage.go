@@ -8,6 +8,9 @@ import (
 	"time"
 )
 
+var ErrNeedSQLCompatibleInterface = errors.New("SQL storage must be SQLCompatible")
+var ErrDatabaseDriverIsNotSupported = errors.New("This database driver is not supported")
+
 /* ---- Storage Interface ---- */
 // Basic Storage interface, thai includes Users, Servers, Subscriptions interfaces.
 type Storage interface {
@@ -20,6 +23,7 @@ type Storage interface {
 type TelegramID int64
 type UserID int64
 type ServerID int64
+type CountryID int64
 
 func (id TelegramID) String() string {
 	return strconv.FormatInt(int64(id), 10)
@@ -33,19 +37,25 @@ func (id ServerID) String() string {
 	return strconv.FormatInt(int64(id), 10)
 }
 
+func (id CountryID) String() string {
+	return strconv.FormatInt(int64(id), 10)
+}
+
 /* ---- Errors ---- */
 var ErrNoSuchUser = errors.New("no such user")
 var ErrNoSuchServer = errors.New("no such server")
 var ErrNoSuchServerAuth = errors.New("no such server auth")
+var ErrNoSuchSubscription = errors.New("no such subscription")
+var ErrNoSuchCountry = errors.New("no such country")
 
 /* ---- Users Interface ---- */
 // Represent VPN User
 type User struct {
-	ID           UserID     `db:"id"`
-	TelegramID   TelegramID `db:"telegram_id"`
-	TelegramName string     `db:"telegram_name"`
-	CreatedAt    time.Time  `db:"created_at"`
-	UpdatedAt    time.Time  `db:"updated_at"`
+	ID           UserID     `db:"id" json:"id"`
+	TelegramID   TelegramID `db:"telegram_id" json:"telegram_id"`
+	TelegramName string     `db:"telegram_name" json:"telegram_name"`
+	CreatedAt    time.Time  `db:"created_at" json:"created_at"`
+	UpdatedAt    time.Time  `db:"updated_at" json:"updated_at"`
 }
 
 // Users interface, that includes:
@@ -75,16 +85,16 @@ type UserQuery interface {
 /* ---- Servers Interface ---- */
 // Represent VPN Server
 type VPNServer struct {
-	ID        ServerID  `db:"id"`
-	CountryID int64     `db:"country_id"`
-	Name      string    `db:"name"`
-	Protocol  string    `db:"protocol"`
-	Host      string    `db:"host"`
-	Port      int       `db:"port"`
-	Username  string    `db:"username"`
-	Password  string    `db:"password"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
+	ID        ServerID  `db:"id" json:"id"`
+	CountryID CountryID `db:"country_id" json:"country_id"`
+	Name      string    `db:"name" json:"name"`
+	Protocol  string    `db:"protocol" json:"protocol"`
+	Host      string    `db:"host" json:"host"`
+	Port      int       `db:"port" json:"port"`
+	Username  string    `db:"username" json:"username"`
+	Password  string    `db:"password" json:"password"`
+	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 }
 
 // Servers interface, that includes:
@@ -131,12 +141,19 @@ type ServerAuthorizations interface {
 }
 
 /* ---- Subscriptions Interface ---- */
+
+const (
+	SubscriptionStatusActive   = "active"
+	SubscriptionStatusExpired  = "expired"
+	SubscriptionStatusDisabled = "disabled"
+)
+
 // Represent Subscription of VPN User to VPN Server
 type Subscription struct {
-	UserID                UserID    `db:"user_id"`
-	ServerID              ServerID  `db:"server_id"`
-	SubscriptionStatus    string    `db:"subscription_status"`
-	SubscriptionExpiredAt time.Time `db:"subscription_expired_at"`
+	UserID                UserID    `db:"user_id" json:"user_id"`
+	ServerID              ServerID  `db:"server_id" json:"server_id"`
+	SubscriptionStatus    string    `db:"subscription_status" json:"subscription_status"`
+	SubscriptionExpiredAt time.Time `db:"subscription_expired_at" json:"subscription_expired_at"`
 }
 
 // Subscriptions interface, that includes methods to work with Subscription data.
@@ -151,9 +168,9 @@ type Subscriptions interface {
 /* ---- Countries Interface ---- */
 // Represent Country
 type Country struct {
-	CountryID int64  `db:"country_id"`
-	Name      string `db:"country_name"`
-	Flag      string `db:"country_flag"`
+	CountryID   CountryID `db:"country_id" json:"-"`
+	CountryName string    `db:"country_name" json:"name"`
+	CountryCode string    `db:"country_code" json:"code"`
 }
 
 /* ---- SQLCompatible ---- */
