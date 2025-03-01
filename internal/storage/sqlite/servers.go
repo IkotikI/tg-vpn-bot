@@ -13,8 +13,6 @@ import (
 /* ---- Queries Interface implementation ---- */
 
 func (s *SQLStorage) GetServerByUserID(ctx context.Context, userID storage.UserID) (server []*storage.VPNServer, err error) {
-	defer func() { e.WrapIfErr("can't get server by user id", err) }()
-
 	q := `
 		SELECT * FROM server AS s
 		JOIN servers_servers ON servers.id = servers_servers.user_id AS us
@@ -28,19 +26,24 @@ func (s *SQLStorage) GetServerByUserID(ctx context.Context, userID storage.UserI
 
 /* ---- Reader Interface implementation ---- */
 
-func (s *SQLStorage) GetAllServers(ctx context.Context) (servers []*storage.VPNServer, err error) {
-	defer func() { e.WrapIfErr("can't get all servers", err) }()
+func (s *SQLStorage) GetServers(ctx context.Context, args *storage.QueryArgs) (servers *[]storage.VPNServer, err error) {
+
+	selectArgs := s.parseQueryArgs(args)
 
 	q := `SELECT * FROM servers`
 
-	err = s.db.SelectContext(ctx, servers, q)
+	queryEnd, queryArgs := s.builder.BuildParts([]string{"where", "order_by", "limit"}, selectArgs)
+	q += " " + queryEnd
+	fmt.Printf("query: %s\n", q)
+	fmt.Printf("query args: %v\n", queryArgs)
+
+	servers = &[]storage.VPNServer{}
+	err = s.db.SelectContext(ctx, servers, q, queryArgs...)
 
 	return servers, err
 }
 
 func (s *SQLStorage) GetServerByID(ctx context.Context, id storage.ServerID) (server *storage.VPNServer, err error) {
-	defer func() { e.WrapIfErr("can't get user by id", err) }()
-
 	q := `SELECT * FROM servers WHERE id = ? LIMIT 1`
 
 	server = &storage.VPNServer{}
@@ -58,9 +61,7 @@ func (s *SQLStorage) GetServerByID(ctx context.Context, id storage.ServerID) (se
 /* ---- Writer Interface implementation ---- */
 
 func (s *SQLStorage) SaveServer(ctx context.Context, server *storage.VPNServer) (serverID storage.ServerID, err error) {
-	defer func() { e.WrapIfErr("can't save server", err) }()
 	var id int64
-
 	q := `SELECT * FROM servers WHERE id = ? LIMIT 1`
 
 	var result sql.Result

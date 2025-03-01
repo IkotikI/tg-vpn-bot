@@ -11,11 +11,14 @@ import (
 )
 
 type StorageServiceQueries interface {
-	GetUsers(ctx context.Context, args builder.Arguments) (*[]entity.User, error)
-	GetServers(ctx context.Context, args builder.Arguments) (*[]entity.Server, error)
+	GetEntityUsers(ctx context.Context, args builder.Arguments) (*[]entity.User, error)
+	GetEntityServers(ctx context.Context, args builder.Arguments) (*[]entity.Server, error)
 	GetEntityServerByID(ctx context.Context, serverID storage.ServerID) (*entity.Server, error)
 	GetSubscriptionsWithServersByUserID(ctx context.Context, user_id storage.UserID, args builder.Arguments) (*[]entity.SubscriptionWithServer, error)
 	GetSubscriptionsWithUsersByServerID(ctx context.Context, user_id storage.ServerID, args builder.Arguments) (*[]entity.SubscriptionWithUser, error)
+	GetSubscriptionsWithUsersAndServers(ctx context.Context, args builder.Arguments) (*[]entity.SubscriptionWithUserAndServer, error)
+	GetSubscriptionWithUserAndServerByIDs(ctx context.Context, userID storage.UserID, serverID storage.ServerID) (*entity.SubscriptionWithUserAndServer, error)
+	Count(ctx context.Context, args builder.Arguments) (n int64, err error)
 }
 
 type StorageService interface {

@@ -23,7 +23,11 @@ templ UI(r *http.Request, args map[string]templ.Component) {
 	if header, ok := args["header"]; ok {
 		@header
 	}
-	<section id="notification"></section>
+	<section id="notification">
+		if status, ok := args["status"]; ok {
+			@status
+		}
+	</section>
 	if leftSidebar, ok := args["left-sidebar"]; ok {
 		<aside id="left-sidebar">
 			@leftSidebar
@@ -33,6 +37,11 @@ templ UI(r *http.Request, args map[string]templ.Component) {
 		<main id="main">
 			@main
 		</main>
+	}
+	if pagination, ok := args["pagination"]; ok {
+		<div id="pagination">
+			@pagination
+		</div>
 	}
 	if rightSidebar, ok := args["right-sidebar"]; ok {
 		<aside id="right-sidebar">

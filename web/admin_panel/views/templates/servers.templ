@@ -2,7 +2,6 @@ package templates
 
 import (
 	"strconv"
-	"strings"
 	"vpn-tg-bot/web/admin_panel/entity"
 )
 
@@ -11,7 +10,7 @@ templ ServersTable(servers *[]entity.Server) {
 		<thead>
 			<tr>
 				<th>ID</th>
-				<th>Country ID</th>
+				<th>Country</th>
 				<th>Name</th>
 				<th>Protocol</th>
 				<th>Host</th>
@@ -32,10 +31,13 @@ templ ServersTable(servers *[]entity.Server) {
 
 templ ServerRow(server entity.Server) {
 	{{ serverLink := ServerLinkT(server.ID) }}
-	{{ flagID := strings.ToLower(server.CountryCode) }}
 	<tr>
 		<td><a href={ serverLink }>{ server.ID.String() }</a></td>
-		<td><span class={ "fi fis fi-" + flagID }></span>{ server.VPNServer.CountryID.String() } </td>
+		<td>
+			@FlagIcon(server.CountryCode)
+			&nbsp;
+			{ server.CountryName }
+		</td>
 		<td>{ server.Name }</td>
 		<td>{ server.Protocol }</td>
 		<td>{ server.Host }</td>

@@ -1,0 +1,16 @@
+meta {
+  name: Sub
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://{{HOST}}:{{SUB_PORT}}{{WEBBASEPATH}}/sub/{{subID}}
+  body: none
+  auth: none
+}
+
+vars:pre-request {
+  subID: n2b9ubaioe06cak8
+  : 
+}

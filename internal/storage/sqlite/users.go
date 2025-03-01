@@ -13,8 +13,6 @@ import (
 /* ---- Queries Interface implementation ---- */
 
 func (s *SQLStorage) GetUserByServerID(ctx context.Context, serverID storage.ServerID) (users []*storage.User, err error) {
-	defer func() { e.WrapIfErr("can't get users by server id", err) }()
-
 	q := `
 		SELECT * FROM users AS u
 		JOIN users_servers ON users.id = users_servers.user_id AS us
@@ -30,21 +28,33 @@ func (s *SQLStorage) GetUserByServerID(ctx context.Context, serverID storage.Ser
 }
 
 /* ---- Reader Interface implementation ---- */
+// TODO: Method query is bad for selection users, because it breaks encapsulation of storage
+// interface. Better approach don't provide general query method as well as don't query full table
+// of users. Select queries must be always limited by category, or, at least, total number.
+// Uncontrolled select query can overfill memory. In this implementation I shall operate just
+// defined in storage.go abstractions or basic Golang types.
+//
+// where, order_by, limit - are 3 pillars of making SQL selection by given table (join).
+// Where can accept: column name, operator, value(s)
+// Order_by can accept: column name, order (ASC DESC)
+// Limit can accept: offset, limit
 
-func (s *SQLStorage) GetAllUsers(ctx context.Context) (users *[]storage.User, err error) {
-	defer func() { e.WrapIfErr("can't get all users", err) }()
+func (s *SQLStorage) GetUsers(ctx context.Context, args *storage.QueryArgs) (users *[]storage.User, err error) {
+
+	selectArgs := s.parseQueryArgs(args)
 
 	q := `SELECT * FROM users`
 
+	queryEnd, queryArgs := s.builder.BuildParts([]string{"where", "order_by", "limit"}, selectArgs)
+	q += queryEnd
+
 	users = &[]storage.User{}
-	err = s.db.SelectContext(ctx, users, q)
+	err = s.db.SelectContext(ctx, users, q, queryArgs...)
 
 	return users, err
 }
 
 func (s *SQLStorage) GetUserByID(ctx context.Context, id storage.UserID) (user *storage.User, err error) {
-	defer func() { e.WrapIfErr("can't get user by id", err) }()
-
 	q := `SELECT * FROM users WHERE id = ? LIMIT 1`
 
 	user = &storage.User{}
@@ -62,8 +72,6 @@ func (s *SQLStorage) GetUserByID(ctx context.Context, id storage.UserID) (user *
 /* ---- Writer Interface implementation ---- */
 
 func (s *SQLStorage) SaveUser(ctx context.Context, user *storage.User) (userID storage.UserID, err error) {
-	defer func() { e.WrapIfErr("can't save user", err) }()
-
 	var id int64
 
 	q := `SELECT * FROM users WHERE id = ? OR telegram_id = ? LIMIT 1`
@@ -117,7 +125,6 @@ func (s *SQLStorage) SaveUser(ctx context.Context, user *storage.User) (userID s
 }
 
 func (s *SQLStorage) RemoveUserByID(ctx context.Context, id storage.UserID) (err error) {
-	defer func() { e.WrapIfErr("can't remove user by id", err) }()
 	q := "DELETE FROM users WHERE id = ?"
 
 	var result sql.Result

@@ -46,7 +46,6 @@ var DefaultInbound model.Inbound = model.Inbound{
 
 /* ---- Inbound ---- */
 func (c *XUIClient) AddInbound(ctx context.Context, inbound *model.Inbound) (addedInbound *model.Inbound, err error) {
-	defer func() { err = e.WrapIfErr("can't add inbound", err) }()
 
 	data, err := json.Marshal(inbound)
 	if err != nil {
@@ -68,7 +67,6 @@ func (c *XUIClient) AddInbound(ctx context.Context, inbound *model.Inbound) (add
 }
 
 func (c *XUIClient) UpdateInbound(ctx context.Context, inbound *model.Inbound) (updatedInbound *model.Inbound, err error) {
-	defer func() { err = e.WrapIfErr("can't update inbound", err) }()
 	if inbound == nil {
 		return nil, errors.New("inbound is nil")
 	}
@@ -102,7 +100,6 @@ func (c *XUIClient) UpdateInbound(ctx context.Context, inbound *model.Inbound) (
 }
 
 func (c *XUIClient) DeleteInbound(ctx context.Context, inboundID int) (err error) {
-	defer func() { err = e.WrapIfErr("can't delete inbound", err) }()
 
 	args := struct{ InboundID int }{InboundID: inboundID}
 	path, err := c.PreparePath(DeleteInboundPath, args)
@@ -125,7 +122,7 @@ func (c *XUIClient) DeleteInbound(ctx context.Context, inboundID int) (err error
 		return e.Wrap("can't read response body", err)
 	}
 
-	respStruct := &Response{Obj: &model.Inbound{}}
+	respStruct := &Response{Obj: int(0)}
 	err = json.Unmarshal(body, respStruct)
 	if err != nil {
 		return e.Wrap("can't unmarshal inbound", err)
@@ -139,7 +136,6 @@ func (c *XUIClient) DeleteInbound(ctx context.Context, inboundID int) (err error
 }
 
 func (c *XUIClient) GetInbound(ctx context.Context, inboundID int) (inbound *model.Inbound, err error) {
-	defer func() { err = e.WrapIfErr("can't get inbound", err) }()
 
 	args := struct{ InboundID int }{InboundID: inboundID}
 	path, err := c.PreparePath(GetInboundPath, args)

@@ -36,9 +36,9 @@ func Index(view templ.Component) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(PublicPath + Versioned("/css/main.css"))
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(PublicPath + Versioned("/dest/css/main.css"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/index.templ`, Line: 12, Col: 72}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/index.templ`, Line: 12, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -72,7 +72,7 @@ func ScriptIndexJS() templ.Component {
 	return templ.Raw(
 		fmt.Sprintf(
 			`<script id="index" type="module">import * as Index from "%s"</script>`,
-			PublicPath+"/js/dest/index.js"),
+			PublicPath+"/dest/js/index.js"),
 		nil)
 }
 

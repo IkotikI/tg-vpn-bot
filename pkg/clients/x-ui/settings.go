@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"vpn-tg-bot/pkg/clients/x-ui/model"
-	"vpn-tg-bot/pkg/e"
 )
 
 const (
@@ -14,8 +13,9 @@ const (
 
 func (c *XUIClient) GetAllSettings(ctx context.Context) (settings *model.AllSetting, err error) {
 	defer func() {
-		e.WrapIfErr("can't get all settings", err)
-		c.Settings = settings
+		if err == nil {
+			c.Settings = settings
+		}
 	}()
 
 	resp, err := c.post(ctx, AllSettingsPath, nil)

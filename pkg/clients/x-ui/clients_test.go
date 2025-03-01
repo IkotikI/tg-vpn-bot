@@ -6,11 +6,22 @@ import (
 	"testing"
 	"time"
 	"vpn-tg-bot/pkg/clients/x-ui/model"
+	"vpn-tg-bot/pkg/debug"
 )
 
 var test_inboundID = 1
+
 var test_email = "test@example.com"
 var test_uuid = "f00ec978-7f3a-49b0-aff6-fd3c88fa6186"
+
+// var test_email = "2test@example.com"
+// var test_uuid = "200ec978-7f3a-49b0-aff6-fd3c88fa6186"
+
+func TestAddUpdateRemoveClient(t *testing.T) {
+	TestAddClient(t)
+	TestUpdateClient(t)
+	TestDeleteClient(t)
+}
 
 func TestAddClient(t *testing.T) {
 	xui := New(TokenKey_3x_ui, server, makeAuthStore())
@@ -100,7 +111,7 @@ func TestGetClientTraffic(t *testing.T) {
 			t.Fatal(err)
 		}
 		cancel()
-		t.Logf("client traffic: %+v\n", clientByEmail)
+		t.Logf("client traffic:\n%s\n", debug.JSON(clientByEmail))
 	})
 	time.Sleep(time.Millisecond * 100)
 
@@ -111,7 +122,7 @@ func TestGetClientTraffic(t *testing.T) {
 			t.Fatal(err)
 		}
 		cancel()
-		t.Logf("clients traffic: %+v\n", clientByID)
+		t.Logf("clients traffic:\n%s\n", debug.JSON(clients))
 		for _, client := range *clients {
 			if client.Email == test_email {
 				clientByID = &client

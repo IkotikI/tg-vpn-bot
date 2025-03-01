@@ -27,7 +27,7 @@ func (b *SQLiteBuilder) BuildFrom(f builder.Table) (string, []interface{}) {
 	if f == "" {
 		return "", nil
 	}
-	return "FROM ?", []interface{}{f}
+	return spf("FROM `%s`", f), []interface{}{}
 }
 
 func (b *SQLiteBuilder) BuildWhere(w []builder.Where) (string, []interface{}) {
@@ -38,14 +38,12 @@ func (b *SQLiteBuilder) BuildWhere(w []builder.Where) (string, []interface{}) {
 	str := make([]string, size)
 	args := make([]interface{}, size*2)
 	for i, where := range w {
-		if where.Column == "" || where.Operator == "" || where.Value == "" {
+		if where.Column == "" || where.Operator == "" || where.Value == nil || where.Value == "" {
 			size--
 			continue
 		}
-		// Each iteration 2 args will be added
-		str[i] = spf("? %s ?", where.Operator)
-		args[i*2] = where.Column
-		args[i*2+1] = where.Value
+		str[i] = spf("`%s` %s ?", where.Column, where.Operator)
+		args[i] = where.Value
 	}
 	// Reduce slice sizes
 	str = str[:size]

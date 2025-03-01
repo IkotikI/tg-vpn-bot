@@ -14,6 +14,10 @@ func ServerLink(id storage.ServerID) string {
 	return "/server/" + id.String()
 }
 
+func SubscriptionLink(userID storage.UserID, serverID storage.ServerID) string {
+	return "/subscription/" + serverID.String() + "/" + userID.String()
+}
+
 // Provide link in templ.SafeURL format.
 func UserLinkT(id storage.UserID) templ.SafeURL {
 	return templ.URL(UserLink(id))
@@ -22,4 +26,9 @@ func UserLinkT(id storage.UserID) templ.SafeURL {
 // Provide link in templ.SafeURL format.
 func ServerLinkT(id storage.ServerID) templ.SafeURL {
 	return templ.URL(ServerLink(id))
+}
+
+// Provide link in templ.SafeURL format.
+func SubscriptionLinkT(userID storage.UserID, serverID storage.ServerID) templ.SafeURL {
+	return templ.URL(SubscriptionLink(userID, serverID))
 }

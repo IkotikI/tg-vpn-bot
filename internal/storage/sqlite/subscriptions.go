@@ -3,7 +3,6 @@ package sqlite
 import (
 	"context"
 	"vpn-tg-bot/internal/storage"
-	"vpn-tg-bot/pkg/e"
 )
 
 /* ---- Interface implementation ---- */
@@ -11,8 +10,6 @@ import (
 /* ---- Writer Interface impoelementation ---- */
 
 func (s *SQLStorage) SaveSubscription(ctx context.Context, sub *storage.Subscription) (err error) {
-	defer func() { e.WrapIfErr("can't save subscription", err) }()
-
 	q := `
 		INSERT INTO subscriptions (user_id, server_id, subscription_status, subscription_expired_at)
 		VALUES (?, ?, ?, ?)
@@ -46,8 +43,6 @@ func (s *SQLStorage) SaveSubscription(ctx context.Context, sub *storage.Subscrip
 }
 
 func (s *SQLStorage) RemoveSubscriptionByIDs(ctx context.Context, userID storage.UserID, serverID storage.ServerID) (err error) {
-	defer func() { e.WrapIfErr("can't remove subscription by id", err) }()
-
 	q := `DELETE FROM subscriptions WHERE user_id = ? AND server_id = ?`
 
 	_, err = s.db.ExecContext(ctx, q, userID, serverID)
@@ -57,8 +52,6 @@ func (s *SQLStorage) RemoveSubscriptionByIDs(ctx context.Context, userID storage
 /* ---- Reader Interface implementation ---- */
 
 func (s *SQLStorage) GetSubscriptionByIDs(ctx context.Context, userID storage.UserID, serverID storage.ServerID) (subscription *storage.Subscription, err error) {
-	defer func() { e.WrapIfErr("can't get subscription by user and server ids", err) }()
-
 	q := `SELECT * FROM subscriptions WHERE user_id = ? AND server_id = ? LIMIT 1`
 
 	subscription = &storage.Subscription{}
@@ -67,8 +60,6 @@ func (s *SQLStorage) GetSubscriptionByIDs(ctx context.Context, userID storage.Us
 }
 
 func (s *SQLStorage) GetSubscriptionsByUserID(ctx context.Context, userID storage.UserID) (subscriptions *[]storage.Subscription, err error) {
-	defer func() { e.WrapIfErr("can't get subscriptions by user id", err) }()
-
 	q := `SELECT * FROM subscriptions WHERE user_id = ?`
 
 	subscriptions = &[]storage.Subscription{}
@@ -77,8 +68,6 @@ func (s *SQLStorage) GetSubscriptionsByUserID(ctx context.Context, userID storag
 }
 
 func (s *SQLStorage) GetSubscriptionsServerID(ctx context.Context, serverID storage.ServerID) (subscriptions *[]storage.Subscription, err error) {
-	defer func() { e.WrapIfErr("can't get subscriptions by user id", err) }()
-
 	q := `SELECT * FROM subscriptions WHERE server_id = ?`
 
 	subscriptions = &[]storage.Subscription{}

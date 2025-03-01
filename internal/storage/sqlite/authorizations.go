@@ -10,7 +10,6 @@ import (
 
 /* ---- Interface implementation ---- */
 func (s *SQLStorage) SaveServerAuth(ctx context.Context, auth *storage.VPNServerAuthorization) (serverID storage.ServerID, err error) {
-	defer func() { e.WrapIfErr("can't save server authorization", err) }()
 	var id int64
 
 	q := `SELECT * FROM servers_authorizations WHERE server_id = ? LIMIT 1`
@@ -28,6 +27,9 @@ func (s *SQLStorage) SaveServerAuth(ctx context.Context, auth *storage.VPNServer
 		}
 
 		id, err = result.LastInsertId()
+		if err != nil {
+			return 0, e.Wrap("can't get last inserted id", err)
+		}
 		serverID = storage.ServerID(id)
 	} else if err != nil {
 		return 0, e.Wrap("can't scan row", err)
@@ -46,8 +48,6 @@ func (s *SQLStorage) SaveServerAuth(ctx context.Context, auth *storage.VPNServer
 }
 
 func (s *SQLStorage) GetServerAuthByServerID(ctx context.Context, ServerID storage.ServerID) (auth *storage.VPNServerAuthorization, err error) {
-	defer func() { e.WrapIfErr("can't get server authorization by server id", err) }()
-
 	q := `SELECT * FROM servers_authorizations WHERE server_id = ? LIMIT 1`
 
 	auth = &storage.VPNServerAuthorization{}
@@ -63,8 +63,6 @@ func (s *SQLStorage) GetServerAuthByServerID(ctx context.Context, ServerID stora
 }
 
 func (s *SQLStorage) GetServerAndAuthByServerID(ctx context.Context, ServerID storage.ServerID) (server *storage.VPNServer, auth *storage.VPNServerAuthorization, err error) {
-	defer func() { e.WrapIfErr("can't get server and authorization by server id", err) }()
-
 	q := `
 		SELECT * FROM servers AS s
 		JOIN servers_authorizationss AS sa ON sa.server_id = s.id
@@ -78,7 +76,7 @@ func (s *SQLStorage) GetServerAndAuthByServerID(ctx context.Context, ServerID st
 	if err == sql.ErrNoRows {
 		return nil, nil, storage.ErrNoSuchServerAuth
 	} else if err != nil {
-		return nil, nil, e.Wrap("can't execute query", row.Err())
+		return nil, nil, e.Wrap("can't execute query", err)
 	}
 
 	err = row.StructScan(&server)
@@ -95,13 +93,14 @@ func (s *SQLStorage) GetServerAndAuthByServerID(ctx context.Context, ServerID st
 }
 
 func (s *SQLStorage) RemoveServerAuthByServerID(ctx context.Context, ServerID storage.ServerID) (err error) {
-	defer func() { e.WrapIfErr("can't remove server authorization by server id", err) }()
-
 	q := `
 		DELETE FROM servers_authorizations WHERE server_id = ?
 	`
 
 	result, err := s.db.ExecContext(ctx, q, ServerID)
+	if err != nil {
+		return err
+	}
 
 	var n int64
 	n, err = result.RowsAffected()

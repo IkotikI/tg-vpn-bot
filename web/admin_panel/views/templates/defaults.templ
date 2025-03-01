@@ -1,36 +1,52 @@
 package templates
 
+import (
+	"strconv"
+	"vpn-tg-bot/web/admin_panel/entity"
+)
+
 templ DefaultHeader(items map[string]templ.Component) {
-    <header>
-        if navigation, ok := items["navigation"]; ok {
-            @navigation   
-        } else {
-            @MainNavigation([]templ.Component{
-                    MenuItem("/", "Home"),
-                    MenuItem("/users", "Users"),
-                    MenuItem("/servers", "Server"),
-                    MenuItem("/tools", "Tools"),
-            })
-        }
-    </header>
+	<header>
+		if navigation, ok := items["navigation"]; ok {
+			@navigation
+		} else {
+			@MainNavigation([]templ.Component{
+				MenuItem("/", "Home"),
+				MenuItem("/users", "Users"),
+				MenuItem("/servers", "Servers"),
+				MenuItem("/subscriptions", "Subscriptions"),
+				MenuItem("/tools", "Tools"),
+			})
+		}
+	</header>
 }
 
 templ DefaultLeftSidebar() {
-
 }
 
 templ DefaultMain() {
-    <section>
-        <h1>This is default main template</h1>
-        <p>Provide another <i>temp.Component</i> to override this default view!</p>
-    </section>
+	<section>
+		<h1>This is default main template</h1>
+		<p>Provide another <i>temp.Component</i> to override this default view!</p>
+	</section>
 }
 
 templ DefaultRightSidebar() {
+}
 
+templ DefaultPagination(paginationLinks *[]entity.PaginationLink) {
+	<div hx-boost="true" class="flex gap-2">
+		{{ var lastNum int64 = 0 }}
+		for _, link := range *paginationLinks {
+			{{ linkT := templ.SafeURL(link.Link) }}
+			if link.Num - lastNum > 1 {
+				<div class="dots inline-block">...</div>
+			}
+			{{ lastNum = link.Num }}
+			<a class="inline-block" href={ linkT }>{ strconv.FormatInt(link.Num, 10) }</a>
+		}
+	</div>
 }
 
 templ DefaultFooter() {
-    
 }
-

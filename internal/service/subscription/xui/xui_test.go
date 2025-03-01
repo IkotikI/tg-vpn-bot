@@ -3,6 +3,7 @@ package xui_service
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"io"
 	"net/http"
 	"testing"
@@ -51,6 +52,22 @@ func TestUpdateSubscription(t *testing.T) {
 }
 
 func TestGetSub(t *testing.T) {
+	db := makeStore()
+
+	s := NewXUIService(x_ui.TokenKey_3x_ui, db, db)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	link, err := s.SubscriptionLink(ctx, test_ServerID, test_UserID)
+	cancel()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Printf("link: %s", link)
+
+}
+
+func TestGetSubDirect(t *testing.T) {
 	// db := makeStore()
 
 	// s := NewXUIService(x_ui.TokenKey_3x_ui, db, db)

@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"text/template"
@@ -16,6 +18,19 @@ import (
 	"vpn-tg-bot/internal/storage"
 	"vpn-tg-bot/pkg/clients/x-ui/model"
 	"vpn-tg-bot/pkg/e"
+)
+
+const (
+	ErrMsgRecordNotFound = "Something went wrong! Failed: record not found"
+)
+
+var (
+	ErrRegexpDuplicateEmail = regexp.MustCompile("^Something went wrong! Failed: Duplicate email.*")
+)
+
+var (
+	ErrRecordNotFound = errors.New("record not found on remote server")
+	ErrDuplicateEmail = errors.New("duplicate email on remote server")
 )
 
 type XUIClient struct {
@@ -76,8 +91,6 @@ func New(tokenKey string, server *storage.VPNServer, authStore storage.ServerAut
 }
 
 func (c *XUIClient) Onlines(ctx context.Context) (emails *[]string, err error) {
-	defer func() { e.WrapIfErr("can't get onlines", err) }()
-
 	resp, err := c.post(ctx, OnlinesPath, nil)
 	if err != nil {
 		return nil, e.Wrap("can't get onlines", err)
@@ -106,15 +119,29 @@ func (c *XUIClient) PreparePath(path string, args interface{}) (activePath strin
 }
 
 func (c *XUIClient) APILinkURL(path string) (u *url.URL) {
-	if strings.Count(path, "://") > 0 {
-		u, _ = url.Parse(path)
-	} else {
+	var err error
+	u, err = url.Parse(path)
+
+	// If there an error, than recognize variable path as url path.
+	if err != nil {
+		log.Printf("[ERR] clients/x-ui: APILinkURL: Can't parse url: %s", path)
 		u = &url.URL{
 			Scheme: c.Protocol,
 			Host:   c.Host + ":" + strconv.Itoa(c.Port),
 			Path:   path,
 		}
+		return u
 	}
+
+	// Otherwise provide defaults for scheme and host.
+	if u.Scheme == "" {
+		u.Scheme = c.Protocol
+	}
+
+	if u.Host == "" {
+		u.Host = c.Host + ":" + strconv.Itoa(c.Port)
+	}
+
 	return u
 }
 
@@ -123,8 +150,7 @@ func (c *XUIClient) APILink(path string) string {
 }
 
 func (c *XUIClient) get(ctx context.Context, path string, body io.Reader) (httpResp *http.Response, err error) {
-	defer func() { e.WrapIfErr("can't make request", err) }()
-
+	var request *http.Request
 	for retry := 0; retry < c.MaxRetry; retry++ {
 
 		if c.token == "" {
@@ -137,7 +163,7 @@ func (c *XUIClient) get(ctx context.Context, path string, body io.Reader) (httpR
 		authCookie := http.Cookie{Name: c.TokenKey, Value: c.token}
 
 		fmt.Println("c.APILink(path)", c.APILink(path))
-		request, err := http.NewRequestWithContext(ctx, "GET", c.APILink(path), body)
+		request, err = http.NewRequestWithContext(ctx, "GET", c.APILink(path), body)
 		if err != nil {
 			// Error making request depends of bad internal logic. Retries useless.
 			return nil, e.Wrap("can't create get request", err)
@@ -159,7 +185,7 @@ func (c *XUIClient) get(ctx context.Context, path string, body io.Reader) (httpR
 		// fmt.Printf("cookies: %s, from %+v\n", authCookie.String(), authCookie)
 		// Debug End
 
-		if httpResp.StatusCode != http.StatusOK || httpResp.Header.Get("Content-Type") != "application/json" {
+		if httpResp.StatusCode != http.StatusOK || !strings.Contains(httpResp.Header.Get("Content-Type"), "application/json") {
 			err = c.login(ctx)
 			if err != nil {
 				if retry != 0 {
@@ -178,8 +204,7 @@ func (c *XUIClient) get(ctx context.Context, path string, body io.Reader) (httpR
 }
 
 func (c *XUIClient) post(ctx context.Context, path string, body io.Reader) (httpResp *http.Response, err error) {
-	defer func() { e.WrapIfErr("can't make request", err) }()
-
+	var request *http.Request
 	for retry := 0; retry < c.MaxRetry; retry++ {
 
 		if c.token == "" {
@@ -191,7 +216,7 @@ func (c *XUIClient) post(ctx context.Context, path string, body io.Reader) (http
 
 		authCookie := http.Cookie{Name: c.TokenKey, Value: c.token}
 
-		request, err := http.NewRequestWithContext(ctx, "POST", c.APILink(path), body)
+		request, err = http.NewRequestWithContext(ctx, "POST", c.APILink(path), body)
 		if err != nil {
 			// Error making request depends of bad internal logic. Retries useless.
 			return nil, e.Wrap("can't create post request", err)
@@ -202,18 +227,25 @@ func (c *XUIClient) post(ctx context.Context, path string, body io.Reader) (http
 
 		httpResp, err = c.httpClient.Do(request)
 		if err != nil {
-			log.Printf("can't execute post request, retry %d, error: %s", retry, err)
+			log.Printf("can't execute post request, retry %d, error: %s\n", retry, err)
 			time.Sleep(100 * time.Millisecond)
 			continue
 		}
 
+		// contentType := httpResp.Header.Get("Content-Type")
+
 		// Debug
-		fmt.Println("post response content type", httpResp.Header.Get("Content-Type"))
+		fmt.Printf("post response content type %s, status code %d \n", httpResp.Header.Get("Content-Type"), httpResp.StatusCode)
+		// fmt.Printf("is application/json?: %t\n", strings.Contains(contentType, "application/json"))
+		// fmt.Printf("is status OK?: %t\n", httpResp.StatusCode == http.StatusOK)
 		fmt.Printf("full api path: %s\n", c.APILink(path))
+		// fmt.Printf("is both ok?: %t\n", httpResp.StatusCode != http.StatusOK || strings.Contains(httpResp.Header.Get("Content-Type"), "application/json"))
+		// fmt.Println("token: ", c.token)
 		// fmt.Printf("cookies: %s, from %+v\n", authCookie.String(), authCookie)
 		// Debug End
 
-		if httpResp.StatusCode != http.StatusOK || httpResp.Header.Get("Content-Type") != "application/json" {
+		if httpResp.StatusCode != http.StatusOK || !strings.Contains(httpResp.Header.Get("Content-Type"), "application/json") {
+			fmt.Println("status code or header is bad; need to login")
 			err = c.login(ctx)
 			if err != nil {
 				if retry != 0 {
@@ -232,7 +264,6 @@ func (c *XUIClient) post(ctx context.Context, path string, body io.Reader) (http
 }
 
 func (c *XUIClient) login(ctx context.Context) (err error) {
-	defer func() { e.WrapIfErr("can't login 3x-ui", err) }()
 	fmt.Println("try to login")
 
 	payload := model.LoginRequest{
@@ -348,7 +379,6 @@ func (c *XUIClient) ServerID() storage.ServerID {
 // Unmarshal http.Response.Body and assign data from .Obj field to given type T.
 // See: Response{} type; model/model.go.
 func assignResponseTo[T any](resp *http.Response) (t *T, err error) {
-	defer func() { e.WrapIfErr(fmt.Sprintf("can't assign %T", t), err) }()
 	t = new(T)
 
 	body, err := io.ReadAll(resp.Body)
@@ -362,14 +392,15 @@ func assignResponseTo[T any](resp *http.Response) (t *T, err error) {
 		return nil, e.Wrap(fmt.Sprintf("can't unmarshal %T", t), err)
 	}
 
-	if respStruct.Success == false {
-		return nil, fmt.Errorf("server responded with error: \"%s\"", respStruct.Msg)
+	err = CheckResponseError(respStruct)
+	if err != nil {
+		return nil, err
 	}
 
 	t, ok := respStruct.Obj.(*T)
-	fmt.Printf("respStruct.Obj.(%T) %+v", t, t)
+	fmt.Printf("respStruct.Obj.(%T) \n%+v\n", t, t)
 	if !ok {
-		fmt.Printf("respStruct %+v", respStruct)
+		fmt.Printf("respStruct \n%+v\n", respStruct)
 		return nil, fmt.Errorf("can't cast Obj to %T", t)
 	}
 	if t == nil {
@@ -377,4 +408,20 @@ func assignResponseTo[T any](resp *http.Response) (t *T, err error) {
 	}
 
 	return t, nil
+}
+
+func CheckResponseError(respStruct *Response) error {
+	if respStruct.Success {
+		return nil
+	}
+
+	switch {
+	case respStruct.Msg == ErrMsgRecordNotFound:
+		return ErrRecordNotFound
+	case ErrRegexpDuplicateEmail.MatchString(respStruct.Msg):
+		return ErrDuplicateEmail
+	default:
+		return fmt.Errorf("server responded with error: \"%s\"", respStruct.Msg)
+	}
+
 }

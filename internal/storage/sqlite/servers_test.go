@@ -88,7 +88,7 @@ func TestAddServers(t *testing.T) {
 	for i := 0; i < n; i++ {
 
 		testServer := &storage.VPNServer{
-			CountryID: storage.CountryID(int64(i) + 7 + rand.Int64N(400)),
+			CountryID: storage.CountryID(1 + rand.Int64N(250)),
 			Name:      "test" + strconv.Itoa(i),
 			Protocol:  "test" + strconv.Itoa(i),
 			Host:      "test" + strconv.Itoa(i),
@@ -109,4 +109,34 @@ func TestAddServers(t *testing.T) {
 		// time.Sleep(time.Microsecond * 100)
 
 	}
+}
+
+func TestUpdateServer(t *testing.T) {
+	s, err := New(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	args := &storage.QueryArgs{
+		Where: []storage.Where{
+			{
+				Column:   "country_id",
+				Operator: storage.OpMore,
+				Value:    250,
+			},
+		},
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 1000*time.Millisecond)
+	servers, err := s.GetServers(ctx, args)
+	cancel()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, server := range *servers {
+		fmt.Printf("id: %d, country_id %d\n", server.ID, server.CountryID)
+	}
+
+	// TODO
 }

@@ -3,9 +3,16 @@ package controller
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strconv"
 	"vpn-tg-bot/pkg/e"
 	"vpn-tg-bot/web/admin_panel/views"
+)
+
+const (
+	ErrMsgNotFound            = "Not found."
+	ErrMsgServerInternalError = "Server Internal Error."
 )
 
 type BaseController struct{}
@@ -40,4 +47,34 @@ func writeJSON(w http.ResponseWriter, status int, v interface{}) error {
 		return e.Wrap("can't write bytes", err)
 	}
 	return nil
+}
+
+func getInt64FromVars[T ~int64](vars map[string]string, key string) (T, error) {
+	str, ok := vars[key]
+	if !ok {
+		return 0, fmt.Errorf("can't find %s in vars", key)
+	}
+
+	i, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	return T(i), err
+}
+
+func (c *BaseController) writeErrorNotFound(w http.ResponseWriter, ctx context.Context) {
+	writeError(w, ctx, http.StatusNotFound, ErrMsgNotFound)
+}
+
+func (c *BaseController) writeErrorServerInternal(w http.ResponseWriter, ctx context.Context) {
+	writeError(w, ctx, http.StatusInternalServerError, ErrMsgServerInternalError)
+}
+
+func (c *BaseController) writeJSONNotFound(w http.ResponseWriter) {
+	writeJSON(w, http.StatusNotFound, ErrMsgNotFound)
+}
+
+func (c *BaseController) writeJSONServerInternal(w http.ResponseWriter) {
+	writeJSON(w, http.StatusInternalServerError, ErrMsgServerInternalError)
 }

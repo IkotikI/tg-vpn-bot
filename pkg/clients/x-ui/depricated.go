@@ -12,7 +12,6 @@ import (
 
 // Exclude Inbound from the response. Reduce some boilerplate.
 func (c *XUIClient) assignInbound(resp *http.Response) (inbound *model.Inbound, err error) {
-	defer func() { e.WrapIfErr("can't assign inbound", err) }()
 	inbound = &model.Inbound{}
 
 	body, err := io.ReadAll(resp.Body)

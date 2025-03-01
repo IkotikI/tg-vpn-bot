@@ -1,40 +1,48 @@
 package xui_service
 
-func (s *XUIService) SubscriptionLink() {
+func (s *XUIService) _SubscriptionLink(ctx context.Context, sub *storage.Subscription) (link string, err error) {
+	defer func() { e.WrapIfErr("can't generate subscription link", err) }()
 
-	//./web/service/setting.go:565
-	if result["subEnable"].(bool) && (result["subURI"].(string) == "" || result["subJsonURI"].(string) == "") {
-		subURI := ""
-		subPort, _ := s.GetSubPort()
-		subPath, _ := s.GetSubPath()
-		subJsonPath, _ := s.GetSubJsonPath()
-		subDomain, _ := s.GetSubDomain()
-		subKeyFile, _ := s.GetSubKeyFile()
-		subCertFile, _ := s.GetSubCertFile()
-		subTLS := false
-		if subKeyFile != "" && subCertFile != "" {
-			subTLS = true
-		}
-		if subDomain == "" {
-			subDomain = strings.Split(host, ":")[0]
-		}
-		if subTLS {
-			subURI = "https://"
-		} else {
-			subURI = "http://"
-		}
-		if (subPort == 443 && subTLS) || (subPort == 80 && !subTLS) {
-			subURI += subDomain
-		} else {
-			subURI += fmt.Sprintf("%s:%d", subDomain, subPort)
-		}
-		if result["subURI"].(string) == "" {
-			result["subURI"] = subURI + subPath
-		}
-		if result["subJsonURI"].(string) == "" {
-			result["subJsonURI"] = subURI + subJsonPath
-		}
+	if sub.UserID == 0 {
+		return "", ErrZeroUserID
 	}
+
+	if sub.ServerID == 0 {
+		return "", ErrZeroServerID
+	}
+
+	xui, err := s.xuiClientInstance(ctx, sub.ServerID)
+	if err != nil {
+		return nil, e.Wrap("can't get xui client instance", err)
+	}
+
+	settings, err := xui.GetAllSettings(ctx)
+	if err != nil {
+		return nil, e.Wrap("can't get xui settings", err)
+	}
+
+	inbound, err := xui.GetInbound(ctx, s.inboundID)
+	if err != nil {
+		return nil, e.Wrap("can't get inbound")
+	}
+
+	client, err := s.GetClient(ctx, inbound, sub.UserID)
+	if err != nil {
+		return nil, e.Wrap("can't get client by ids", err)
+	}
+
+	protocol := inbound.Protocol
+	host := inbound.Address
+	port := inbound.Port
+
+	linkArgs := map[string]string{
+		"type": inbound.
+		"security": client.Security,
+	}
+
+	linkArgsStr := strings.Join([]string{"type=tcp"})
+	link := fmt.Sprintf("%s://%s@%s:%d?%s",protocol, host, port, linkArgsStr,  )
+	 
 
 
 	// ./web/html/xui/inbound_info_modal.html

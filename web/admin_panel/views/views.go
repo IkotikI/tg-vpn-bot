@@ -1,6 +1,7 @@
 package views
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -12,6 +13,7 @@ import (
 
 var BasePath string
 var PublicPath string
+var PublicDestPath string
 var PublicAssetsMeta map[string]entity.FileMeta
 
 var executableTimestampS int64 = 0
@@ -59,6 +61,75 @@ func Versioned(path string) string {
 	}
 
 	return path + "?v=" + strconv.FormatInt(s, 10)
+}
+
+func PaginationLinks(base string, p entity.Pagination, r int) *[]entity.PaginationLink {
+	// If 1 page, don't make mess
+	if p.TotalPages <= 1 {
+		return &[]entity.PaginationLink{{Link: base, Num: 1}}
+	}
+
+	// If 2 pages, it's easy too.
+	if p.TotalPages == 2 {
+		return &[]entity.PaginationLink{
+			{Link: base + fmt.Sprintf("?&per_page=%d", p.PerPage), Num: 1},
+			{Link: base + fmt.Sprintf("?page=2&per_page=%d", p.PerPage), Num: 2},
+		}
+	}
+
+	// Least case:   1,2,3...10   - Page: 1, r: 3
+	// Link number:  0   r   1
+	// Average capacity: 1...3,4,5,6,7...10
+	// Link number:      1  -r   0  +r   1
+	start := make([]entity.PaginationLink, 0, r+1)
+	end := make([]entity.PaginationLink, 0, r+1)
+
+	start = append(start, entity.PaginationLink{
+		Link: base + fmt.Sprintf("?per_page=%d", p.PerPage),
+		Num:  1,
+	})
+
+	n := p.Page
+
+	// Make n-th link
+	if n != 1 && n != p.TotalPages {
+		end = append(end, entity.PaginationLink{
+			Link: base + fmt.Sprintf("?page=%d&per_page=%d", n, p.PerPage),
+			Num:  n,
+		})
+	}
+
+	var l, h int64
+	// Making links for left and right sides around n-th page, limited
+	// by radius r.
+	for i := 1; i < r; i++ {
+		l = n - int64(r) + int64(i)
+		h = n + int64(i)
+		if l > 1 {
+			start = append(start, entity.PaginationLink{
+				Link: base + fmt.Sprintf("?page=%d&per_page=%d", l, p.PerPage),
+				Num:  l,
+			})
+		}
+		if h < p.TotalPages {
+			end = append(end, entity.PaginationLink{
+				Link: base + fmt.Sprintf("?page=%d&per_page=%d", h, p.PerPage),
+				Num:  h,
+			})
+		}
+	}
+
+	end = append(end, entity.PaginationLink{
+		Link: base + fmt.Sprintf("?page=%d&per_page=%d", p.TotalPages, p.PerPage),
+		Num:  p.TotalPages,
+	})
+
+	fmt.Printf("start %+v\n", start)
+	fmt.Printf("end %+v\n", end)
+
+	links := append(start, end...)
+
+	return &links
 }
 
 func getExecutableTimestamp() (t time.Time, err error) {

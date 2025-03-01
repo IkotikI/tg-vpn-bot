@@ -30,9 +30,10 @@ type Server struct {
 	certFile   string
 	keyFile    string
 
-	panel  *controller.PanelController
-	user   *controller.UserController
-	server *controller.ServerController
+	panel        *controller.PanelController
+	user         *controller.UserController
+	server       *controller.ServerController
+	subscription *controller.SubscriptionController
 
 	httpServer http.Server
 	// ctx context.Context
@@ -94,6 +95,7 @@ func (s *Server) initRouter() (http.Handler, error) {
 	s.panel = controller.NewPanelController(r, s.storage)
 	s.user = controller.NewUserController(r, s.storage)
 	s.server = controller.NewServerController(r, s.storage)
+	s.subscription = controller.NewSubscriptionController(r, s.storage)
 
 	// Debug
 	d, err := os.Getwd()
@@ -112,6 +114,7 @@ func (s *Server) initRouter() (http.Handler, error) {
 func (s *Server) specifyViewPaths(basePath string) {
 	views.BasePath = basePath
 	views.PublicPath = basePath + "/" + AssetsPrefix
+	views.PublicDestPath = views.PublicPath + "/dest"
 
 	// err := s.collectFileMetadata()
 	// if err != nil {

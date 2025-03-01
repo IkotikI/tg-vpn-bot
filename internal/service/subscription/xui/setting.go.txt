@@ -70,7 +70,9 @@ var defaultValueMap = map[string]string{
 	"warp":               "",
 }
 
-type SettingService struct{}
+type SettingService struct{
+	settings map[string]interface{}
+}
 
 func (s *SettingService) GetDefaultJsonConfig() (interface{}, error) {
 	var jsonData interface{}
@@ -81,6 +83,8 @@ func (s *SettingService) GetDefaultJsonConfig() (interface{}, error) {
 	return jsonData, nil
 }
 
+
+/*
 func (s *SettingService) GetAllSetting() (*entity.AllSetting, error) {
 	db := database.GetDB()
 	settings := make([]*model.Setting, 0)
@@ -154,7 +158,9 @@ func (s *SettingService) GetAllSetting() (*entity.AllSetting, error) {
 	}
 
 	return allSetting, nil
-}
+} 
+	
+
 
 func (s *SettingService) ResetSettings() error {
 	db := database.GetDB()
@@ -166,7 +172,7 @@ func (s *SettingService) ResetSettings() error {
 		Where("1 = 1").
 		Update("login_secret", "").Error
 }
-
+*/
 func (s *SettingService) getSetting(key string) (*model.Setting, error) {
 	db := database.GetDB()
 	setting := &model.Setting{}
@@ -178,6 +184,7 @@ func (s *SettingService) getSetting(key string) (*model.Setting, error) {
 }
 
 func (s *SettingService) saveSetting(key string, value string) error {
+	/*
 	setting, err := s.getSetting(key)
 	db := database.GetDB()
 	if database.IsNotFound(err) {
@@ -191,7 +198,11 @@ func (s *SettingService) saveSetting(key string, value string) error {
 	setting.Key = key
 	setting.Value = value
 	return db.Save(setting).Error
+	*/
+	s.settings[key] = value
+	return nil
 }
+
 
 func (s *SettingService) getString(key string) (string, error) {
 	setting, err := s.getSetting(key)
@@ -206,6 +217,8 @@ func (s *SettingService) getString(key string) (string, error) {
 	}
 	return setting.Value, nil
 }
+
+
 
 func (s *SettingService) setString(key string, value string) error {
 	return s.saveSetting(key, value)
@@ -365,12 +378,12 @@ func (s *SettingService) SetSecretStatus(value bool) error {
 
 func (s *SettingService) GetSecret() ([]byte, error) {
 	secret, err := s.getString("secret")
-	if secret == defaultValueMap["secret"] {
+	/*if secret == defaultValueMap["secret"] {
 		err := s.saveSetting("secret", secret)
 		if err != nil {
 			logger.Warning("save secret failed:", err)
 		}
-	}
+	}*/
 	return []byte(secret), err
 }
 

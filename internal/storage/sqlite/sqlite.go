@@ -4,13 +4,16 @@ import (
 	"database/sql"
 	"os"
 	"vpn-tg-bot/pkg/e"
+	"vpn-tg-bot/pkg/sqlbuilder"
+	"vpn-tg-bot/pkg/sqlbuilder/builder"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 type SQLStorage struct {
-	db *sqlx.DB
+	db      *sqlx.DB
+	builder *builder.SQLBuilder
 }
 
 func New(source string) (*SQLStorage, error) {
@@ -23,7 +26,12 @@ func New(source string) (*SQLStorage, error) {
 		return nil, e.Wrap("can't connect to database", err)
 	}
 
-	return &SQLStorage{db: db}, nil
+	builder, err := sqlbuilder.NewSQLBuilder(db.DriverName())
+	if err != nil {
+		return nil, e.Wrap("can't create bulder", err)
+	}
+
+	return &SQLStorage{db: db, builder: builder}, nil
 }
 
 func (s *SQLStorage) Init() error {

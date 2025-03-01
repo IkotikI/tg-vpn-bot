@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"vpn-tg-bot/internal/storage"
 	"vpn-tg-bot/web/admin_panel/entity"
 	"vpn-tg-bot/web/admin_panel/service"
@@ -17,7 +16,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const ErrMsgUserNotFound = "User not found."
+const (
+	ErrMsgUserNotFound   = "User not found."
+	ErrMsgUserIDMismatch = "UserID mismatch."
+)
 
 type UserController struct {
 	BaseController
@@ -54,27 +56,20 @@ func (c *UserController) userView(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	vars := mux.Vars(r)
-	idStr, ok := vars["id"]
-	if !ok {
-		writeError(w, ctx, http.StatusNotFound, ErrMsgUserNotFound)
-		return
-	}
 
-	idInt64, err := strconv.ParseInt(idStr, 10, 64)
+	id, err := getInt64FromVars[storage.UserID](vars, "id")
 	if err != nil {
-		writeError(w, ctx, http.StatusNotFound, ErrMsgUserNotFound)
+		c.writeErrorNotFound(w, ctx)
 		return
 	}
-
-	id := storage.UserID(idInt64)
 
 	user, err := c.storage.GetUserByID(ctx, id)
 	if err == storage.ErrNoSuchUser {
-		writeError(w, ctx, http.StatusNotFound, ErrMsgUserNotFound)
+		c.writeErrorNotFound(w, ctx)
 		return
 	} else if err != nil {
 		log.Printf("[ERR] UserController: userView: %v", err)
-		writeError(w, ctx, 500, ErrMsgServerInternalError)
+		c.writeErrorServerInternal(w, ctx)
 		return
 	}
 
@@ -97,19 +92,12 @@ func (c *UserController) userUpdate(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	vars := mux.Vars(r)
-	idStr, ok := vars["id"]
-	if !ok {
-		writeJSON(w, http.StatusNotFound, ErrMsgUserNotFound)
-		return
-	}
 
-	idInt64, err := strconv.ParseInt(idStr, 10, 64)
+	id, err := getInt64FromVars[storage.UserID](vars, "id")
 	if err != nil {
-		writeJSON(w, http.StatusNotFound, ErrMsgUserNotFound)
+		c.writeJSONNotFound(w)
 		return
 	}
-
-	id := storage.UserID(idInt64)
 
 	user := &storage.User{}
 
@@ -129,7 +117,7 @@ func (c *UserController) userUpdate(w http.ResponseWriter, r *http.Request) {
 
 	if user.ID != id {
 		if user.ID != 0 {
-			writeJSON(w, http.StatusNotFound, "User ID mismatch.")
+			writeJSON(w, http.StatusNotFound, ErrMsgUserIDMismatch)
 			return
 		}
 		user.ID = id
@@ -153,12 +141,12 @@ func (c *UserController) userUpdate(w http.ResponseWriter, r *http.Request) {
 	id, err = c.storage.SaveUser(ctx, user)
 	if err != nil {
 		log.Printf("[ERR] UserController: userUpdate: %v", err)
-		writeJSON(w, http.StatusInternalServerError, ErrMsgServerInternalError)
+		c.writeJSONServerInternal(w)
 		return
 	}
 	if id == 0 {
 		log.Printf("[ERR] UserController: userUpdate: storage return 0 updated id")
-		writeJSON(w, http.StatusInternalServerError, ErrMsgServerInternalError)
+		c.writeJSONServerInternal(w)
 		return
 	}
 
@@ -168,4 +156,12 @@ func (c *UserController) userUpdate(w http.ResponseWriter, r *http.Request) {
 		Obj:     id,
 	}
 	writeJSON(w, 200, resp)
+}
+
+func (c *UserController) writeErrorNotFound(w http.ResponseWriter, ctx context.Context) {
+	writeError(w, ctx, http.StatusNotFound, ErrMsgUserNotFound)
+}
+
+func (c *UserController) writeJSONNotFound(w http.ResponseWriter) {
+	writeJSON(w, http.StatusNotFound, ErrMsgUserNotFound)
 }

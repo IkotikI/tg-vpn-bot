@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -23,14 +22,6 @@ const (
 	DeleteClientPath     = InboundsPrefix + "/{{.InboundID}}/delClient/{{.ClientID}}"
 )
 
-const (
-	ErrMsgRecordNotFound = "Something went wrong! Failed: record not found"
-)
-
-var (
-	ErrRecordNotFound = errors.New("record not found on remote server")
-)
-
 // var (
 //
 //	// Clients
@@ -41,7 +32,6 @@ var (
 type ClientID = uuid.UUID
 
 func ParseClientID(s string) (cID ClientID, err error) {
-	defer func() { e.WrapIfErr("can't parse ClientID", err) }()
 	id, err := uuid.Parse(s)
 	return ClientID(id), err
 }
@@ -59,8 +49,6 @@ type Settings struct {
 
 /* ---- Client ---- */
 func (c *XUIClient) AddClient(ctx context.Context, inboundID int, client *model.Client) (err error) {
-	defer func() { e.WrapIfErr("can't add client", err) }()
-
 	payload, err := c.prepareClientPayload(inboundID, client)
 	if err != nil {
 		return err
@@ -88,19 +76,10 @@ func (c *XUIClient) AddClient(ctx context.Context, inboundID int, client *model.
 		return e.Wrap("can't unmarshal response", err)
 	}
 
-	if respStruct.Success == false {
-		if respStruct.Msg == ErrMsgRecordNotFound {
-			return ErrRecordNotFound
-		}
-		return fmt.Errorf("server responded with error: \"%s\"", respStruct.Msg)
-	}
-
-	return nil
+	return CheckResponseError(respStruct)
 }
 
 func (c *XUIClient) UpdateClient(ctx context.Context, inboundID int, client *model.Client) (err error) {
-	defer func() { e.WrapIfErr("can't update client", err) }()
-
 	payload, err := c.prepareClientPayload(inboundID, client)
 	if err != nil {
 		return err
@@ -143,19 +122,10 @@ func (c *XUIClient) UpdateClient(ctx context.Context, inboundID int, client *mod
 		return e.Wrap("can't unmarshal response", err)
 	}
 
-	if respStruct.Success == false {
-		if respStruct.Msg == ErrMsgRecordNotFound {
-			return ErrRecordNotFound
-		}
-		return fmt.Errorf("server responded with error: \"%s\"", respStruct.Msg)
-	}
-
-	return nil
+	return CheckResponseError(respStruct)
 }
 
 func (c *XUIClient) DeleteClient(ctx context.Context, inboundID int, clientID ClientID) (err error) {
-	defer func() { e.WrapIfErr("can't delete client", err) }()
-
 	args := struct {
 		InboundID int
 		ClientID  ClientID
@@ -188,19 +158,10 @@ func (c *XUIClient) DeleteClient(ctx context.Context, inboundID int, clientID Cl
 		return e.Wrap("can't unmarshal response", err)
 	}
 
-	if respStruct.Success == false {
-		if respStruct.Msg == ErrMsgRecordNotFound {
-			return ErrRecordNotFound
-		}
-		return fmt.Errorf("server responded with error: \"%s\"", respStruct.Msg)
-	}
-
-	return nil
+	return CheckResponseError(respStruct)
 }
 
 func (c *XUIClient) GetClientTrafficByID(ctx context.Context, clientID ClientID) (client *[]model.ClientTraffic, err error) {
-	defer func() { e.WrapIfErr("can't get client by id", err) }()
-
 	args := struct{ ClientID ClientID }{ClientID: clientID}
 	path, err := c.PreparePath(GetClientByIDPath, args)
 	if err != nil {
@@ -220,8 +181,6 @@ func (c *XUIClient) GetClientTrafficByID(ctx context.Context, clientID ClientID)
 }
 
 func (c *XUIClient) GetClientClientTrafficsByEmail(ctx context.Context, email string) (clients *model.ClientTraffic, err error) {
-	defer func() { e.WrapIfErr("can't get client by email", err) }()
-
 	args := struct{ Email string }{Email: email}
 	path, err := c.PreparePath(GetClientByEmailPath, args)
 	if err != nil {

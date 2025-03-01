@@ -1,6 +1,7 @@
 package builder
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -69,6 +70,16 @@ func (b *SQLBuilder) Build(a Arguments) (string, []interface{}) {
 	return strings.Join(queryParts, " "), sqlArgs
 }
 
+// Support types *SelectArguments, *InsertArguments
+func (b *SQLBuilder) ValidateArgs(args interface{}) error {
+	switch args.(type) {
+	case *SelectArguments, *InsertArguments:
+		return nil
+	default:
+		return fmt.Errorf("unsupported arguments type: %T", args)
+	}
+}
+
 /* ---- Basic types ---- */
 type Column string
 
@@ -79,7 +90,7 @@ type Value string
 type Where struct {
 	Column   string
 	Operator string
-	Value    string
+	Value    interface{}
 }
 
 type Limit struct {

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"vpn-tg-bot/internal/storage"
 	"vpn-tg-bot/web/admin_panel/entity"
 	"vpn-tg-bot/web/admin_panel/service"
@@ -17,7 +16,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const ErrMsgServerNotFound = "Server not found."
+const (
+	ErrMsgServerNotFound   = "Server not found."
+	ErrMsgServerIDMismatch = "ServerID mismatch."
+)
 
 type ServerController struct {
 	BaseController
@@ -54,34 +56,26 @@ func (c *ServerController) serverView(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	vars := mux.Vars(r)
-	idStr, ok := vars["id"]
-	if !ok {
-		writeError(w, ctx, 404, ErrMsgServerNotFound)
-		return
-	}
-
-	idInt64, err := strconv.ParseInt(idStr, 10, 64)
+	id, err := getInt64FromVars[storage.ServerID](vars, "id")
 	if err != nil {
-		writeError(w, ctx, 404, ErrMsgServerNotFound)
+		c.writeErrorNotFound(w, ctx)
 		return
 	}
-
-	id := storage.ServerID(idInt64)
 
 	server, err := c.storage.GetEntityServerByID(ctx, id)
 	if err == storage.ErrNoSuchServer {
-		writeError(w, ctx, 404, ErrMsgServerNotFound)
+		c.writeErrorNotFound(w, ctx)
 		return
 	} else if err != nil {
 		log.Printf("[ERR] ServerController: ServerView: %v", err)
-		writeError(w, ctx, 500, ErrMsgServerInternalError)
+		c.writeErrorServerInternal(w, ctx)
 		return
 	}
 
 	subs, err := c.storage.GetSubscriptionsWithUsersByServerID(ctx, id, nil)
 	if err != nil {
 		log.Printf("[ERR] ServerController: ServerView: %v", err)
-		writeError(w, ctx, 500, ErrMsgServerInternalError)
+		c.writeErrorServerInternal(w, ctx)
 		return
 	}
 
@@ -99,19 +93,12 @@ func (c *ServerController) serverUpdate(w http.ResponseWriter, r *http.Request) 
 	defer cancel()
 
 	vars := mux.Vars(r)
-	idStr, ok := vars["id"]
-	if !ok {
-		writeJSON(w, http.StatusNotFound, ErrMsgServerNotFound)
-		return
-	}
 
-	idInt64, err := strconv.ParseInt(idStr, 10, 64)
+	id, err := getInt64FromVars[storage.ServerID](vars, "id")
 	if err != nil {
-		writeJSON(w, http.StatusNotFound, ErrMsgServerNotFound)
+		c.writeJSONNotFound(w)
 		return
 	}
-
-	id := storage.ServerID(idInt64)
 
 	server := &storage.VPNServer{}
 
@@ -131,7 +118,7 @@ func (c *ServerController) serverUpdate(w http.ResponseWriter, r *http.Request) 
 
 	if server.ID != id {
 		if server.ID != 0 {
-			writeJSON(w, http.StatusNotFound, "Server ID mismatch.")
+			writeJSON(w, http.StatusNotFound, ErrMsgServerIDMismatch)
 			return
 		}
 		server.ID = id
@@ -155,12 +142,12 @@ func (c *ServerController) serverUpdate(w http.ResponseWriter, r *http.Request) 
 	id, err = c.storage.SaveServer(ctx, server)
 	if err != nil {
 		log.Printf("[ERR] ServerController: serverUpdate: %v", err)
-		writeJSON(w, http.StatusInternalServerError, ErrMsgServerInternalError)
+		c.writeJSONServerInternal(w)
 		return
 	}
 	if id == 0 {
 		log.Printf("[ERR] ServerController: serverUpdate: storage return 0 updated id")
-		writeJSON(w, http.StatusInternalServerError, ErrMsgServerInternalError)
+		c.writeJSONServerInternal(w)
 		return
 	}
 
@@ -170,4 +157,12 @@ func (c *ServerController) serverUpdate(w http.ResponseWriter, r *http.Request) 
 		Obj:     id,
 	}
 	writeJSON(w, 200, resp)
+}
+
+func (c *ServerController) writeErrorNotFound(w http.ResponseWriter, ctx context.Context) {
+	writeError(w, ctx, http.StatusNotFound, ErrMsgServerNotFound)
+}
+
+func (c *ServerController) writeJSONNotFound(w http.ResponseWriter) {
+	writeJSON(w, http.StatusNotFound, ErrMsgServerNotFound)
 }

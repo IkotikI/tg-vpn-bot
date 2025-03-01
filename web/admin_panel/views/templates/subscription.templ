@@ -1,0 +1,96 @@
+package templates
+
+import "vpn-tg-bot/web/admin_panel/entity"
+
+templ SubscriptionMain(sub *entity.SubscriptionWithUserAndServer) {
+	<h1 class="uk-h1">
+		Subscription
+	</h1>
+	<div class="relations flex">
+		<div class="from-user flex flex-col">
+			<div class="header uk-h3">User</div>
+			<div class="content flex gap-2">
+				<p>{ sub.User.ID.String() }</p>
+				<p>{ sub.User.TelegramID.String() }</p>
+				<p>{ sub.User.TelegramName }</p>
+			</div>
+		</div>
+		<div class="separator text-6xl">
+			to
+		</div>
+		<div class="to-server">
+			<div class="header uk-h3 flex flex-col">Server</div>
+			<div class="content flex gap-2">
+				<p>{ sub.Server.ID.String() }</p>
+				<p>
+					{ sub.Server.Name }
+					@FlagIcon(sub.Server.CountryCode)
+				</p>
+			</div>
+		</div>
+	</div>
+	<section class="subscription-profile flex">
+		<div class="subscription-info">
+			<form action="updateSubscription" id="form-subscription" hx-patch={ "/subscription/" + sub.Server.ID.String() + "/" + sub.User.ID.String() } hx-target="#notification">
+				@SubscriptionInfo(sub)
+				<button type="submit" class="uk-button uk-button-default">Save</button>
+			</form>
+		</div>
+		<div class="subscription-from-to">
+			<h1>Relation</h1>
+			@SubscriptionFromToTable(sub)
+		</div>
+	</section>
+}
+
+templ SubscriptionInfo(sub *entity.SubscriptionWithUserAndServer) {
+	<div class="p-2">
+		<label class="uk-form-label" for="user_id">User ID</label>
+		<input class="uk-input" name="user_id" type="text" placeholder="User ID" value={ sub.User.ID.String() } disabled/>
+	</div>
+	<div class="p-2">
+		<label class="uk-form-label" for="server_id">Server ID</label>
+		<input class="uk-input" name="server_id" type="text" placeholder="Server ID" value={ sub.Server.ID.String() } disabled/>
+	</div>
+	<div class="p-2">
+		<label class="uk-form-label" for="subscription_status">Status</label>
+		<input class="uk-input" name="subscription_status" type="text" placeholder="Status" value={ sub.SubscriptionStatus }/>
+	</div>
+	<div class="p-2">
+		<label class="uk-form-label" for="subscription_expired_at">Updated At</label>
+		<input class="uk-input" name="subscription_expired_at" type="text" placeholder="Updated At" value={ sub.SubscriptionExpiredAt.Format("02.01.2006 15:04") }/>
+	</div>
+}
+
+templ SubscriptionFromToTable(sub *entity.SubscriptionWithUserAndServer) {
+	{{ userLink := UserLinkT(sub.User.ID) }}
+	{{ serverLink := ServerLinkT(sub.Server.ID) }}
+	<table id="user-subscription-from-to-table" class="users-table uk-table uk-table-divider uk-table-hover">
+		<thead>
+			<tr class="text-center">
+				<th class="!border-r border-border" colspan="3">From User</th>
+				<th colspan="3">To Server</th>
+			</tr>
+			<tr>
+				<th>ID</th>
+				<th>Tg ID</th>
+				<th>Tg Name</th>
+				<th>ID</th>
+				<th colspan="2">Name</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><a href={ userLink }>{ sub.UserID.String() }</a></td>
+				<td><a href={ userLink }>{ sub.User.TelegramID.String() }</a></td>
+				<td><a href={ userLink }>{ sub.User.TelegramName }</a></td>
+				<td><a href={ serverLink }>{ sub.ServerID.String() }</a></td>
+				<td>
+					@FlagIcon(sub.Server.CountryCode)
+					{ sub.Server.CountryCode }
+				</td>
+				<td><a href={ serverLink }>{ sub.Server.Name }</a></td>
+			</tr>
+		</tbody>
+	</table>
+}

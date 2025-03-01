@@ -23,6 +23,8 @@ var ErrZeroServerID = errors.New("server id is 0")
 var ErrInvalidSubscriptionStatus = errors.New("invalid subscription status")
 var ErrClientNotFound = errors.New("client not found")
 
+type ClientID = x_ui.ClientID
+
 type XUIService struct {
 	inboundID int
 	retries   int
@@ -59,6 +61,29 @@ func NewXUIService(tokenKey string, store storage.Storage, authStore storage.Ser
 // func (s *XUIService) Onlines(ctx context.Context, serverID storage.ServerID) (emails *[]string, err error) {
 
 // }
+
+func (s *XUIService) SubscriptionLink(ctx context.Context, serverID storage.ServerID, userID storage.UserID) (link string, err error) {
+	if userID == 0 {
+		return "", ErrZeroUserID
+	}
+	if serverID == 0 {
+		return "", ErrZeroServerID
+	}
+
+	xui, err := s.xuiClientInstance(ctx, serverID)
+	if err != nil {
+		return "", err
+	}
+
+	user, err := s.storage.GetUserByID(ctx, userID)
+	if err != nil {
+		return "", err
+	}
+
+	subID := s.ClientSubIDByUser(user)
+
+	return xui.GetSubBySubID(ctx, subID)
+}
 
 // Update Subscription with XUI API and in the Storage.
 func (s *XUIService) UpdateSubscription(ctx context.Context, sub *storage.Subscription) (err error) {
@@ -112,12 +137,12 @@ func (s *XUIService) UpdateSubscription(ctx context.Context, sub *storage.Subscr
 		return e.Wrap("can't get xui client instance", err)
 	}
 
-	uuidStr := s.uuidFromTelegramID(user.TelegramID).String()
 	client := &model.Client{
-		ID:         uuidStr,
-		Email:      uuidStr,
+		ID:         s.ClientIDByUser(user).String(),
+		Email:      s.ClientEmailByUser(user),
 		ExpiryTime: sub.SubscriptionExpiredAt.UnixMilli(),
 		Enable:     enable,
+		SubID:      s.ClientSubIDByUser(user),
 	}
 
 	for i := 0; i < s.retries; i++ {
@@ -182,7 +207,7 @@ func (s *XUIService) DeleteUserSubscription(ctx context.Context, serverID storag
 	return s.storage.RemoveSubscriptionByIDs(ctx, userID, serverID)
 }
 
-func (s *XUIService) getClientByIDs(ctx context.Context, serverID storage.ServerID, userID storage.UserID) (client *model.Client, err error) {
+func (s *XUIService) GetClientByIDs(ctx context.Context, serverID storage.ServerID, userID storage.UserID) (clientPtr *model.Client, err error) {
 	defer func() { e.WrapIfErr("can't get client", err) }()
 
 	xui, err := s.xuiClientInstance(ctx, serverID)
@@ -195,28 +220,23 @@ func (s *XUIService) getClientByIDs(ctx context.Context, serverID storage.Server
 		return nil, err
 	}
 
-	uuidStr := s.uuidFromTelegramID(user.TelegramID).String()
+	clientID := s.ClientIDByUser(user)
 
 	inbound, err := xui.GetInbound(ctx, s.inboundID)
 	if err != nil {
 		return nil, err
 	}
 
-	clients, err := s.GetClients(inbound)
+	client, err := s.GetClient(inbound, clientID)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, client := range clients {
-		if client.ID == uuidStr {
-			return &client, nil
-		}
-	}
-
-	return nil, errors.New("client not found")
+	return &client, nil
 }
 
-func (s *XUIService) GetClient(inbound *model.Inbound, id x_ui.ClientID) (model.Client, error) {
+// Returns Client from Inbound by ClientID.
+func (s *XUIService) GetClient(inbound *model.Inbound, id ClientID) (model.Client, error) {
 	clients, err := s.GetClients(inbound)
 	if err != nil {
 		return model.Client{}, err
@@ -234,6 +254,7 @@ func (s *XUIService) GetClient(inbound *model.Inbound, id x_ui.ClientID) (model.
 
 // @see vendor/github.com/MHSanaei/3x-ui/web/service/inbound.go
 // @link github.com/MHSanaei/3x-ui/blob/main/web/service/inbound.go
+// Return slice of Clients from Inbound.
 func (s *XUIService) GetClients(inbound *model.Inbound) ([]model.Client, error) {
 	settings := map[string][]model.Client{}
 	json.Unmarshal([]byte(inbound.Settings), &settings)
@@ -246,6 +267,18 @@ func (s *XUIService) GetClients(inbound *model.Inbound) ([]model.Client, error) 
 		return nil, nil
 	}
 	return clients, nil
+}
+
+func (s *XUIService) ClientIDByUser(user *storage.User) ClientID {
+	return s.uuidFromTelegramID(user.TelegramID)
+}
+
+func (s *XUIService) ClientEmailByUser(user *storage.User) string {
+	return s.ClientIDByUser(user).String()
+}
+
+func (s *XUIService) ClientSubIDByUser(user *storage.User) string {
+	return s.ClientIDByUser(user).String()
 }
 
 // func (s *XUIService) validateSubscriptions(ctx context.Context, sub *storage.Subscription) (err error) {

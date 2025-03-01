@@ -35,6 +35,9 @@ func (u *User) ParseURLValues(url url.Values, time_layout string) {
 }
 
 func (u *User) ParseDefaultsFrom(from *User) {
+	if u.ID == 0 {
+		u.ID = from.ID
+	}
 	if u.TelegramID == 0 {
 		u.TelegramID = from.TelegramID
 	}
@@ -93,6 +96,9 @@ func (s *VPNServer) ParseURLValues(url url.Values, time_layout string) {
 }
 
 func (s *VPNServer) ParseDefaultsFrom(from *VPNServer) {
+	if s.ID == 0 {
+		s.ID = from.ID
+	}
 	if s.CountryID == 0 {
 		s.CountryID = from.CountryID
 	}
@@ -120,11 +126,38 @@ func (s *VPNServer) ParseDefaultsFrom(from *VPNServer) {
 }
 
 func (s *Subscription) ParseDefaultsFrom(from *Subscription) {
+	if s.UserID == 0 {
+		s.UserID = from.UserID
+	}
+	if s.ServerID == 0 {
+		s.ServerID = from.ServerID
+	}
 	if s.SubscriptionStatus == "" {
 		s.SubscriptionStatus = from.SubscriptionStatus
 	}
 	if s.SubscriptionExpiredAt.IsZero() {
 		s.SubscriptionExpiredAt = from.SubscriptionExpiredAt
+	}
+}
+
+func (s *Subscription) ParseURLValues(url url.Values, time_layout string) {
+	user_id, err := strconv.ParseInt(url.Get("user_id"), 10, 64)
+	if err != nil {
+		user_id = 0
+	}
+	s.UserID = UserID(user_id)
+
+	server_id, err := strconv.ParseInt(url.Get("server_id"), 10, 64)
+	if err != nil {
+		server_id = 0
+	}
+	s.ServerID = ServerID(server_id)
+
+	s.SubscriptionStatus = url.Get("subscription_status")
+
+	s.SubscriptionExpiredAt, err = time.Parse(time_layout, url.Get("subscription_expired_at"))
+	if err != nil {
+		s.SubscriptionExpiredAt = time.Time{}
 	}
 }
 

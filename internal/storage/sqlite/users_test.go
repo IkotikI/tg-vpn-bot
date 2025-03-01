@@ -112,7 +112,12 @@ func TestGetUsers(t *testing.T) {
 	time.Sleep(time.Millisecond * 200)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
-	users, err := db.GetAllUsers(ctx)
+
+	args := &storage.QueryArgs{
+		Offset: 0,
+		Limit:  5,
+	}
+	users, err := db.GetUsers(ctx, args)
 	if err != nil {
 		t.Fatalf("can't get all users: %v", err)
 	}

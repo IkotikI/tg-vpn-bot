@@ -1,0 +1,50 @@
+package templates
+
+import "vpn-tg-bot/web/admin_panel/entity"
+
+templ SubscriptionsTable(subs *[]entity.SubscriptionWithUserAndServer) {
+	<table class="uk-table uk-table-divider uk-table-hover">
+		<thead>
+			<tr>
+				<th></th>
+				<th>From User</th>
+				<th>To Server</th>
+				<th>Status</th>
+				<th>Expired At</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, sub := range *subs {
+				@SubscriptionRow(sub)
+			}
+		</tbody>
+	</table>
+}
+
+templ SubscriptionRow(sub entity.SubscriptionWithUserAndServer) {
+	{{ subscriptionLink := SubscriptionLinkT(sub.UserID, sub.ServerID) }}
+	{{ sub.User.ID = sub.UserID }}
+	{{ sub.Server.ID = sub.ServerID }}
+	<tr>
+		<td><a href={ subscriptionLink }>Edit</a></td>
+		<td>
+			@UserCellItem(sub.User)
+		</td>
+		<td>
+			@ServerCellItem(sub.Server)
+		</td>
+	</tr>
+}
+
+templ UserCellItem(user entity.User) {
+	<div>
+		{ user.ID.String() + "#" + user.TelegramName }
+	</div>
+}
+
+templ ServerCellItem(server entity.Server) {
+	<div>
+		{ server.ID.String() + "#" + server.Name }
+		@FlagIcon(server.CountryCode)
+	</div>
+}

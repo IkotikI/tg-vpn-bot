@@ -8,8 +8,6 @@ import (
 )
 
 func (s *SQLStorage) SaveCountry(ctx context.Context, country *storage.Country) (countryID storage.CountryID, err error) {
-	defer func() { e.WrapIfErr("can't save country", err) }()
-
 	var id int64
 
 	q := `SELECT * FROM countries WHERE country_id = ? OR country_code = ? LIMIT 1`
@@ -47,8 +45,6 @@ func (s *SQLStorage) SaveCountry(ctx context.Context, country *storage.Country) 
 }
 
 func (s *SQLStorage) GetCountryByID(ctx context.Context, countryID storage.CountryID) (country *storage.Country, err error) {
-	defer func() { e.WrapIfErr("can't get country by id", err) }()
-
 	q := `SELECT * FROM countries WHERE country_id = ? LIMIT 1`
 
 	country = &storage.Country{}
@@ -63,8 +59,6 @@ func (s *SQLStorage) GetCountryByID(ctx context.Context, countryID storage.Count
 }
 
 func (s *SQLStorage) RemoveCountryByID(ctx context.Context, countryID storage.CountryID) (err error) {
-	defer func() { e.WrapIfErr("can't remove country by id", err) }()
-
 	q := `DELETE FROM countries WHERE country_id = ?`
 
 	_, err = s.db.ExecContext(ctx, q, countryID)

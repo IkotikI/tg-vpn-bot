@@ -48,6 +48,10 @@ var ErrNoSuchServerAuth = errors.New("no such server auth")
 var ErrNoSuchSubscription = errors.New("no such subscription")
 var ErrNoSuchCountry = errors.New("no such country")
 
+var ErrZeroUserID = errors.New("zero user id")
+var ErrZeroServerID = errors.New("zero server id")
+var ErrZeroTelegramID = errors.New("zero telegram id")
+
 /* ---- Users Interface ---- */
 // Represent VPN User
 type User struct {
@@ -74,12 +78,12 @@ type UserWriter interface {
 }
 
 type UserReader interface {
-	GetAllUsers(ctx context.Context) (*[]User, error)
 	GetUserByID(ctx context.Context, id UserID) (*User, error)
 }
 
 type UserQuery interface {
-	GetUserByServerID(ctx context.Context, serverID ServerID) ([]*User, error)
+	GetUsers(ctx context.Context, args *QueryArgs) (*[]User, error)
+	GetUserByServerID(ctx context.Context, serverID ServerID) (*[]User, error)
 }
 
 /* ---- Servers Interface ---- */
@@ -113,12 +117,12 @@ type ServerWriter interface {
 }
 
 type ServerReader interface {
-	GetAllServers(ctx context.Context) ([]*VPNServer, error)
 	GetServerByID(ctx context.Context, id ServerID) (*VPNServer, error)
 }
 
 type ServerQuery interface {
-	GetServerByUserID(ctx context.Context, userID UserID) ([]*VPNServer, error)
+	GetServers(ctx context.Context, args *QueryArgs) (*[]VPNServer, error)
+	GetServerByUserID(ctx context.Context, userID UserID) (*[]VPNServer, error)
 }
 
 /* ---- Servers Authorization ---- */
@@ -197,3 +201,97 @@ type SQLStorage interface {
 	Storage
 	SQLCompatible
 }
+
+/* --- Tables ---- */
+type Table string
+
+const (
+	TableUsers               Table = "users"
+	TableServer              Table = "servers"
+	TableSubscription        Table = "subscriptions"
+	TableCountry             Table = "countries"
+	TableServerAuthorization Table = "server_authorizations"
+)
+
+/* --- Query --- */
+type QueryArgs struct {
+	Where   []Where
+	Order   Order
+	OrderBy string
+	Limit   int64
+	Offset  int64
+}
+
+type Operator string
+
+const (
+	OpEqual       Operator = "="
+	OpNotEqual    Operator = "!="
+	OpLess        Operator = "<"
+	OpMore        Operator = ">"
+	OpLessOrEqual Operator = "<="
+	OpMoreOrEqual Operator = ">="
+)
+
+type Where struct {
+	Column   string
+	Operator Operator
+	Value    interface{}
+}
+
+type Order string
+
+const (
+	OrderASC  Order = "ASC"
+	OrderDECS Order = "DESC"
+)
+
+/* ---- Builder Interface ---- */
+// For making complex requests need to provide a Builder.
+// Builder provide methods:
+// - Build: build full requests;
+// - BuildParts: build parts of requests, that would joined in PartsOrder of BuilderArguments.
+// Both returns string query and slice of arguments.
+//
+// See: pkg/sqlbuilder
+//
+// Example Implementation:
+// type ConcreteBuilder struct {}
+// type ConcreteArguments struct {
+// 	Arg1 any
+// 	Arg2 any
+// }
+// func (b *ConcreteBuilder) Build(args interface{}) (query string, queryArgs []interface{}) {
+// 	for _, partName := range args.PartsOrder() {
+// 		queryPart, partArgs := args.BuildPartByName(partName, b)
+// 		query += queryPart
+// 		queryArgs = append(queryArgs, partArgs...)
+// 	}
+// 	return
+// }
+// // Like Build, but filter parts from give slice and join them in parts order.
+// func (b *ConcreteBuilder) BuildParts(parts []string, args interface{}) (query string, queryArgs []interface{}) {...}
+// func (a *ConcreteArguments) BuildPartByName(partName string, b Builder) (queryPart string, partArgs []interface{}) {
+// 	switch partName {
+// 	case "partName1":
+// 		return b.BuildPart1(a.Arg1)
+// 	case "partName2":
+// 		return b.BuildPart2(a.Arg2)
+// 	}
+// }
+// func (a *ConcreteArguments) PartsOrder() []string { return []string{"partName1", "partName2"} }
+//
+type Builder interface {
+	Build(args interface{}) (query string, queryArgs []interface{})
+	BuildParts(parts []string, args interface{}) (query string, queryArgs []interface{})
+	ValidateArgs(args interface{}) error
+}
+
+// Builder Arguments provide methods:
+//   - BuildPartByName: build part of request by string name,
+//     returns string query part and slice of arguments;
+//   - PartsOrder: should provide Names of available parts in correct order.
+// type BuilderArguments interface {
+// 	BuildPartByName(partName string, b Builder) (queryPart string, partArgs []interface{})
+// 	PartsOrder() []string
+// }

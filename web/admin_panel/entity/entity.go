@@ -24,12 +24,45 @@ type Server struct {
 	storage.Country
 }
 
+type Subscription struct {
+	storage.Subscription
+}
+
 type SubscriptionWithServer struct {
 	Server
-	storage.Subscription
+	Subscription
 }
 
 type SubscriptionWithUser struct {
 	User
-	storage.Subscription
+	Subscription
+}
+
+type SubscriptionWithUserAndServer struct {
+	User
+	Server
+	Subscription
+}
+
+type QueryArguments struct {
+	Search  string
+	Page    int64
+	PerPage int64
+	Order   string
+	OrderBy string
+}
+
+var DefaultQueryArguments = &QueryArguments{Search: "", Page: 1, PerPage: 10, Order: "DESC", OrderBy: "created_at"}
+
+type Pagination struct {
+	Table        storage.Table
+	RecordsCount int64
+	TotalPages   int64
+	Page         int64
+	PerPage      int64
+}
+
+type PaginationLink struct {
+	Link string
+	Num  int64
 }
