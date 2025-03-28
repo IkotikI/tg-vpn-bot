@@ -44,6 +44,26 @@ func (s *SQLStorage) SaveCountry(ctx context.Context, country *storage.Country) 
 	return countryID, nil
 }
 
+func (s *SQLStorage) GetCountries(ctx context.Context, args *storage.QueryArgs) (countries *[]storage.Country, err error) {
+	q := `SELECT * FROM countries`
+
+	var queryEnd string
+	var queryArgs []interface{}
+	if args != nil {
+		selectArgs := s.parseQueryArgs(args)
+		queryEnd, queryArgs = s.builder.BuildParts([]string{"where", "order_by", "limit"}, selectArgs)
+		q += " " + queryEnd
+	}
+
+	countries = &[]storage.Country{}
+	err = s.db.SelectContext(ctx, countries, q, queryArgs...)
+	if err != nil {
+		return nil, err
+	}
+
+	return countries, nil
+}
+
 func (s *SQLStorage) GetCountryByID(ctx context.Context, countryID storage.CountryID) (country *storage.Country, err error) {
 	q := `SELECT * FROM countries WHERE country_id = ? LIMIT 1`
 

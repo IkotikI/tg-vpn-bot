@@ -230,7 +230,7 @@ func MakePagination(ctx context.Context, db service.StorageService, table storag
 	}
 	args.From = builder.Table(table)
 
-	n, err := db.Count(ctx, args)
+	n, err := db.CountWithBuilder(ctx, args)
 	if err != nil {
 		return entity.Pagination{}, err
 	}

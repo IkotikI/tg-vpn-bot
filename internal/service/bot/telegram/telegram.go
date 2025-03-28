@@ -1,47 +1,52 @@
 package telegram
 
 import (
+	"time"
+	"vpn-tg-bot/internal/service/subscription"
+	"vpn-tg-bot/internal/service/vpnserver"
 	"vpn-tg-bot/internal/storage"
 
 	telebot "gopkg.in/telebot.v4"
 )
 
-type Processor struct {
-	tg      *Bot
-	storage storage.Storage
-}
+type TelegramBot struct {
+	MaxResponseTime          time.Duration
+	DemoSubscriptionDuration time.Duration
 
-func New(bot *Bot, storage storage.Storage) *Processor {
-	return &Processor{
-		tg:      bot,
-		storage: storage,
-	}
-}
+	tg               *telebot.Bot
+	storage          storage.Storage
+	subscriptions    subscription.VPN_API
+	vpnserverManager *vpnserver.VPNServerManager
 
-func (p *Processor) Handle(cmd string, f func() error) {
-	p.tg.Handle(cmd,
-		func(ctx telebot.Context) error {
-			return f()
-		},
-	)
+	view *ViewBuilder
 }
 
 type Settings struct {
 	telebot.Settings
 }
 
-type Bot struct {
-	*telebot.Bot
-}
-
-func NewBot(s Settings) (*Bot, error) {
-	bot, err := telebot.NewBot(s.Settings)
+func New(settings Settings, storage storage.Storage, subscriptions subscription.VPN_API, vpnserverManager *vpnserver.VPNServerManager) (*TelegramBot, error) {
+	bot, err := telebot.NewBot(settings.Settings)
 	if err != nil {
 		return nil, err
 	}
-	return &Bot{Bot: bot}, nil
+	tgbot := &TelegramBot{
+		MaxResponseTime:          2000,
+		DemoSubscriptionDuration: 2 * 24 * time.Hour,
+		tg:                       bot,
+		storage:                  storage,
+		subscriptions:            subscriptions,
+		vpnserverManager:         vpnserverManager,
+	}
+	tgbot.registerHandlers()
+	tgbot.view = NewViewBulder()
+	return tgbot, nil
 }
 
-func (p *Processor) Send(text string) {
-	// p.tg.Bot.Send(text)
+func (b *TelegramBot) Run() {
+	b.tg.Start()
+}
+
+func (b *TelegramBot) Stop() {
+	b.tg.Stop()
 }

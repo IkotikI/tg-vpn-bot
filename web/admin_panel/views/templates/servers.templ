@@ -10,8 +10,8 @@ templ ServersTable(servers *[]entity.Server) {
 		<thead>
 			<tr>
 				<th>ID</th>
-				<th>Country</th>
 				<th>Name</th>
+				<th>Country</th>
 				<th>Protocol</th>
 				<th>Host</th>
 				<th>Port</th>
@@ -33,12 +33,12 @@ templ ServerRow(server entity.Server) {
 	{{ serverLink := ServerLinkT(server.ID) }}
 	<tr>
 		<td><a href={ serverLink }>{ server.ID.String() }</a></td>
+		<td><a href={ serverLink }>{ server.Name }</a></td>
 		<td>
 			@FlagIcon(server.CountryCode)
 			&nbsp;
 			{ server.CountryName }
 		</td>
-		<td>{ server.Name }</td>
 		<td>{ server.Protocol }</td>
 		<td>{ server.Host }</td>
 		<td>{ strconv.Itoa(server.Port) }</td>

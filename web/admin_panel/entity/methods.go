@@ -142,3 +142,14 @@ func (a *QueryArguments) SelectArgs() (argsPtr *builder.SelectArguments) {
 
 	return &args
 }
+
+// func CountriesConvert(storageCountriesPtr *[]storage.Country) (entityCountriesPtr *[]Country) {
+// 	storageCountries := *storageCountriesPtr
+// 	l := len(storageCountries)
+// 	entityCountries := make([]Country, l)
+// 	for i := range l {
+// 		entityCountries[i].Country = storageCountries[i]
+// 	}
+// 	entityCountriesPtr = &entityCountries
+// 	return entityCountriesPtr
+// }

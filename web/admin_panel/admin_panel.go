@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"vpn-tg-bot/internal/service/subscription"
 	"vpn-tg-bot/internal/storage"
 	"vpn-tg-bot/pkg/debug"
 	"vpn-tg-bot/web/admin_panel/controller"
@@ -35,7 +36,8 @@ type Server struct {
 	server       *controller.ServerController
 	subscription *controller.SubscriptionController
 
-	httpServer http.Server
+	httpServer          http.Server
+	subscriptionService subscription.VPN_API
 	// ctx context.Context
 }
 
@@ -47,20 +49,27 @@ type Settings struct {
 
 	CertFile string
 	KeyFile  string
+
+	SubscriptionService subscription.VPN_API
 }
 
 func New(s Settings) *Server {
 	return &Server{
-		Addr:       s.Addr,
-		Scheme:     s.Scheme,
-		storage:    s.Storage,
-		sessionKey: s.SessionKey,
-		certFile:   s.CertFile,
-		keyFile:    s.KeyFile,
+		Addr:                s.Addr,
+		Scheme:              s.Scheme,
+		storage:             s.Storage,
+		sessionKey:          s.SessionKey,
+		certFile:            s.CertFile,
+		keyFile:             s.KeyFile,
+		subscriptionService: s.SubscriptionService,
 	}
 }
 
 func (s *Server) Run() (err error) {
+	err = s.CheckSettings()
+	if err != nil {
+		return err
+	}
 	r, err := s.initRouter()
 	if err != nil {
 		return err
@@ -93,7 +102,7 @@ func (s *Server) initRouter() (http.Handler, error) {
 	r := mux.NewRouter()
 
 	s.panel = controller.NewPanelController(r, s.storage)
-	s.user = controller.NewUserController(r, s.storage)
+	s.user = controller.NewUserController(r, s.storage, s.subscriptionService)
 	s.server = controller.NewServerController(r, s.storage)
 	s.subscription = controller.NewSubscriptionController(r, s.storage)
 
@@ -121,6 +130,25 @@ func (s *Server) specifyViewPaths(basePath string) {
 	// 	log.Printf("[ERR] Can't collect file metadata: %v", err)
 	// }
 	// views.PublicAssetsMeta = publicAssetsMeta
+}
+
+func (s *Server) CheckSettings() error {
+	if s.subscriptionService == nil {
+		return fmt.Errorf("subscription service is not set")
+	}
+	if s.storage == nil {
+		return fmt.Errorf("storage is not set")
+	}
+	if s.sessionKey == "" {
+		return fmt.Errorf("session key is not set")
+	}
+	if s.Addr == "" {
+		s.Addr = ":8080"
+	}
+	if s.Scheme == "" {
+		s.Scheme = "http"
+	}
+	return nil
 }
 
 // func (s *Server) collectFileMetadata() (err error) {

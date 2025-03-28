@@ -117,25 +117,48 @@ func TestUpdateServer(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	maxCountryID := int64(250)
+
 	args := &storage.QueryArgs{
 		Where: []storage.Where{
 			{
 				Column:   "country_id",
 				Operator: storage.OpMore,
-				Value:    250,
+				Value:    maxCountryID,
 			},
 		},
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1000*time.Millisecond)
-	servers, err := s.GetServers(ctx, args)
+	serversPtr, err := s.GetServers(ctx, args)
 	cancel()
 	if err != nil {
 		t.Fatal(err)
 	}
+	servers := *serversPtr
 
-	for _, server := range *servers {
+	for _, server := range servers {
 		fmt.Printf("id: %d, country_id %d\n", server.ID, server.CountryID)
+		server.CountryID = storage.CountryID(1 + rand.Int64N(maxCountryID-1))
+		ctx, cancel = context.WithTimeout(context.Background(), 100*time.Millisecond)
+		fmt.Printf("server to save \n%+v\n", server)
+		id, err := s.SaveServer(ctx, &server)
+		if err != nil {
+			t.Fatal(err)
+		}
+		cancel()
+		t.Logf("updated server with id %v", id)
+	}
+
+	ctx, cancel = context.WithTimeout(context.Background(), 100*time.Millisecond)
+	serversPtr, err = s.GetServers(ctx, args)
+	cancel()
+	if err != nil {
+		t.Fatal(err)
+	}
+	servers = *serversPtr
+	if len(servers) > 0 {
+		t.Fatalf("expected 0 servers, got %d", len(servers))
 	}
 
 	// TODO

@@ -29,5 +29,9 @@ templ-generate:
 air-admin:
 	air -c cmd/admin/.air.toml
 
+# ---- Telegram Bot commands ----
 
+tg: air-tg
 
+air-tg:
+	air -c cmd/bot/.air.toml

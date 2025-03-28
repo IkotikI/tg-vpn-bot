@@ -18,7 +18,7 @@ type StorageServiceQueries interface {
 	GetSubscriptionsWithUsersByServerID(ctx context.Context, user_id storage.ServerID, args builder.Arguments) (*[]entity.SubscriptionWithUser, error)
 	GetSubscriptionsWithUsersAndServers(ctx context.Context, args builder.Arguments) (*[]entity.SubscriptionWithUserAndServer, error)
 	GetSubscriptionWithUserAndServerByIDs(ctx context.Context, userID storage.UserID, serverID storage.ServerID) (*entity.SubscriptionWithUserAndServer, error)
-	Count(ctx context.Context, args builder.Arguments) (n int64, err error)
+	CountWithBuilder(ctx context.Context, args builder.Arguments) (n int64, err error)
 }
 
 type StorageService interface {

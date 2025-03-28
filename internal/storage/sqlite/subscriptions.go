@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"context"
+	"database/sql"
 	"vpn-tg-bot/internal/storage"
 )
 
@@ -56,6 +57,9 @@ func (s *SQLStorage) GetSubscriptionByIDs(ctx context.Context, userID storage.Us
 
 	subscription = &storage.Subscription{}
 	err = s.db.GetContext(ctx, subscription, q, userID, serverID)
+	if err == sql.ErrNoRows {
+		return nil, storage.ErrNoSuchSubscription
+	}
 	return subscription, err
 }
 

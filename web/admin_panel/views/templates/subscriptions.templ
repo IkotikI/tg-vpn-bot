@@ -38,13 +38,16 @@ templ SubscriptionRow(sub entity.SubscriptionWithUserAndServer) {
 
 templ UserCellItem(user entity.User) {
 	<div>
-		{ user.ID.String() + "#" + user.TelegramName }
+		<a href={ UserLinkT(user.ID) }>{ user.TelegramName }</a>
 	</div>
 }
 
 templ ServerCellItem(server entity.Server) {
 	<div>
-		{ server.ID.String() + "#" + server.Name }
-		@FlagIcon(server.CountryCode)
+		<a href={ ServerLinkT(server.ID) }>
+			{  server.Name + " #" }
+			<span class=""></span>
+			@FlagIcon(server.CountryCode)
+		</a>
 	</div>
 }

@@ -17,6 +17,8 @@ type Storage interface {
 	Users
 	Servers
 	Subscriptions
+	Countries
+	Utilities
 }
 
 /* ---- Simple Types ---- */
@@ -52,6 +54,13 @@ var ErrZeroUserID = errors.New("zero user id")
 var ErrZeroServerID = errors.New("zero server id")
 var ErrZeroTelegramID = errors.New("zero telegram id")
 
+/* ---- Utilities Interface ---- */
+// Utilities interface, that includes:
+// - Count: Imlement counting records in table. Accept "where", "from" QueryArgs.
+type Utilities interface {
+	Count(ctx context.Context, args *QueryArgs) (int64, error)
+}
+
 /* ---- Users Interface ---- */
 // Represent VPN User
 type User struct {
@@ -79,11 +88,12 @@ type UserWriter interface {
 
 type UserReader interface {
 	GetUserByID(ctx context.Context, id UserID) (*User, error)
+	GetUserByTelegramID(ctx context.Context, telegramID TelegramID) (*User, error)
 }
 
 type UserQuery interface {
 	GetUsers(ctx context.Context, args *QueryArgs) (*[]User, error)
-	GetUserByServerID(ctx context.Context, serverID ServerID) (*[]User, error)
+	GetUsersByServerID(ctx context.Context, serverID ServerID) (*[]User, error)
 }
 
 /* ---- Servers Interface ---- */
@@ -122,7 +132,7 @@ type ServerReader interface {
 
 type ServerQuery interface {
 	GetServers(ctx context.Context, args *QueryArgs) (*[]VPNServer, error)
-	GetServerByUserID(ctx context.Context, userID UserID) (*[]VPNServer, error)
+	GetServersByUserID(ctx context.Context, userID UserID) (*[]VPNServer, error)
 }
 
 /* ---- Servers Authorization ---- */
@@ -170,6 +180,13 @@ type Subscriptions interface {
 }
 
 /* ---- Countries Interface ---- */
+type Countries interface {
+	SaveCountry(ctx context.Context, country *Country) (CountryID, error)
+	GetCountries(ctx context.Context, args *QueryArgs) (*[]Country, error)
+	GetCountryByID(ctx context.Context, id CountryID) (*Country, error)
+	RemoveCountryByID(ctx context.Context, id CountryID) error
+}
+
 // Represent Country
 type Country struct {
 	CountryID   CountryID `db:"country_id" json:"-"`
@@ -206,15 +223,16 @@ type SQLStorage interface {
 type Table string
 
 const (
-	TableUsers               Table = "users"
-	TableServer              Table = "servers"
-	TableSubscription        Table = "subscriptions"
-	TableCountry             Table = "countries"
-	TableServerAuthorization Table = "server_authorizations"
+	TableUsers                Table = "users"
+	TableServers              Table = "servers"
+	TableSubscriptions        Table = "subscriptions"
+	TableCountries            Table = "countries"
+	TableServerAuthorizations Table = "server_authorizations"
 )
 
 /* --- Query --- */
 type QueryArgs struct {
+	From    Table
 	Where   []Where
 	Order   Order
 	OrderBy string

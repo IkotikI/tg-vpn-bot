@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"vpn-tg-bot/internal/service/subscription"
 	"vpn-tg-bot/internal/storage"
 	"vpn-tg-bot/web/admin_panel/entity"
 	"vpn-tg-bot/web/admin_panel/service"
@@ -24,13 +25,14 @@ const (
 type UserController struct {
 	BaseController
 
-	storage service.StorageService
+	storage      service.StorageService
+	subscription subscription.VPN_API
 	// service?
 	// cookieStore *sessions.CookieStore
 	// mux         http.Handler
 }
 
-func NewUserController(r *mux.Router, storage storage.Storage) *UserController {
+func NewUserController(r *mux.Router, storage storage.Storage, subscription subscription.VPN_API) *UserController {
 
 	storage_service, err := service.NewStorageService(storage)
 	if err != nil {
@@ -38,7 +40,8 @@ func NewUserController(r *mux.Router, storage storage.Storage) *UserController {
 	}
 
 	c := &UserController{
-		storage: storage_service,
+		storage:      storage_service,
+		subscription: subscription,
 	}
 	c.registerRoutes(r)
 	return c
@@ -49,6 +52,8 @@ func (c *UserController) registerRoutes(r *mux.Router) {
 	userRouter := r.PathPrefix("/").Subrouter()
 	userRouter.HandleFunc("/user/{id:[0-9]+}", c.userView).Methods("GET")
 	userRouter.HandleFunc("/user/{id:[0-9]+}", c.userUpdate).Methods("PUT", "PATCH")
+	userRouter.HandleFunc("/user/{id:[0-9]+}", c.userDelete).Methods("DELETE")
+
 }
 
 func (c *UserController) userView(w http.ResponseWriter, r *http.Request) {
@@ -155,6 +160,49 @@ func (c *UserController) userUpdate(w http.ResponseWriter, r *http.Request) {
 		Msg:     "User updated.",
 		Obj:     id,
 	}
+	writeJSON(w, 200, resp)
+}
+
+func (c *UserController) userDelete(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), PageTimeout)
+	defer cancel()
+
+	vars := mux.Vars(r)
+
+	id, err := getInt64FromVars[storage.UserID](vars, "id")
+	if err != nil {
+		c.writeJSONNotFound(w)
+		return
+	}
+
+	subs, err := c.storage.GetSubscriptionsByUserID(ctx, id)
+	if err != nil && err != storage.ErrNoSuchSubscription {
+		c.writeJSONServerInternal(w)
+	}
+
+	for _, sub := range *subs {
+		err = c.subscription.DeleteUserSubscription(ctx, sub.ServerID, sub.UserID)
+		if err != nil {
+			log.Printf("[ERR] UserController: DeleteUser: %v", err)
+			c.writeJSONServerInternal(w)
+		}
+		log.Printf("[INFO] UserController: DeleteUser: Subsciption deleted: userID: %d, serverID: %d", sub.UserID, sub.ServerID)
+	}
+
+	err = c.storage.RemoveUserByID(ctx, id)
+	if err != nil {
+		log.Printf("[ERR] UserController: DeleteUser: %v", err)
+		c.writeJSONServerInternal(w)
+		return
+	}
+
+	resp := &Response{
+		Success: true,
+		Msg:     "User deleted.",
+		Obj:     id,
+	}
+
+	w.Header().Set("HX-Redirect", "/users")
 	writeJSON(w, 200, resp)
 }
 

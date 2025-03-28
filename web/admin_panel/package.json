@@ -1,6 +1,9 @@
 {
   "main": "index.ts",
   "type": "module",
+  "scripts": {
+    "tsc": "tsc"
+  },
   "dependencies": {
     "@tailwindcss/cli": "^4.0.2",
     "flatpickr": "^4.6.13",

@@ -67,20 +67,27 @@ func (c *ServerController) serverView(w http.ResponseWriter, r *http.Request) {
 		c.writeErrorNotFound(w, ctx)
 		return
 	} else if err != nil {
-		log.Printf("[ERR] ServerController: ServerView: %v", err)
+		log.Printf("[ERR] ServerController: ServerView: GetServer %v", err)
 		c.writeErrorServerInternal(w, ctx)
 		return
 	}
 
 	subs, err := c.storage.GetSubscriptionsWithUsersByServerID(ctx, id, nil)
 	if err != nil {
-		log.Printf("[ERR] ServerController: ServerView: %v", err)
+		log.Printf("[ERR] ServerController: ServerView: GetSubscriptions %v", err)
+		c.writeErrorServerInternal(w, ctx)
+		return
+	}
+
+	countries, err := c.storage.GetCountries(ctx, nil)
+	if err != nil {
+		log.Printf("[ERR] ServerController: ServerView: GetCountries %v", err)
 		c.writeErrorServerInternal(w, ctx)
 		return
 	}
 
 	UI := map[string]templ.Component{
-		"main":   templates.ServerMain(server, subs),
+		"main":   templates.ServerMain(server, subs, countries),
 		"header": templates.DefaultHeader(nil),
 	}
 	index := views.Index(views.UI(r, UI))

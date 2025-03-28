@@ -1,13 +1,6 @@
 package bot
 
-type Fetcher interface {
-	Fetch()
-}
-
-type Processor interface {
-	Process()
-}
-
-type Consumer interface {
-	Start()
+type Bot interface {
+	Run()
+	Stop()
 }

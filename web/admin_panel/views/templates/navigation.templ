@@ -3,27 +3,35 @@ package templates
 import "strconv"
 
 templ MainNavigation(items []templ.Component) {
-    <nav class="h-20">
-        <ul class="main-nav [&>li]:leading-20 gap-2 text-2xl flex">
-        for i, item := range items {
-            <li class={"menu-item-"+strconv.Itoa(i)} hx-boost="true">@item</li>
-        }
-        </ul>
-    </nav>
+	<nav class="h-20 flex items-baseline justify-between px-5">
+		<ul class="main-nav [&>li]:leading-20 gap-2 text-2xl flex">
+			for i, item := range items {
+				<li class={ "menu-item-" + strconv.Itoa(i) } hx-boost="true">
+					@item
+				</li>
+			}
+		</ul>
+		<div class="tools">
+			<button class="darkmode-toggle-btn">
+				<uk-icon icon="sun-moon"></uk-icon>
+			</button>
+		</div>
+	</nav>
 }
 
-
 templ MenuItem(link templ.SafeURL, name string) {
-    <a href={link}>{ name }</a>
+	<a href={ link }>{ name }</a>
 }
 
 templ NestedMenuItem(link templ.SafeURL, name string, items []templ.Component) {
-    <a href={link}>
-        { name }
-        <ul>
-        for i, item := range items {
-            <li class={"menu-subitem-"+strconv.Itoa(i)}>@item</li>
-        }
-        </ul>
-    </a>
+	<a href={ link }>
+		{ name }
+		<ul>
+			for i, item := range items {
+				<li class={ "menu-subitem-" + strconv.Itoa(i) }>
+					@item
+				</li>
+			}
+		</ul>
+	</a>
 }

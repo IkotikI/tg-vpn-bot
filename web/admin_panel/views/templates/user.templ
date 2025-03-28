@@ -9,9 +9,16 @@ templ UserMain(user *storage.User, subscriptions *[]entity.SubscriptionWithServe
 	<h1 class="uk-h1">User <span class="uk-text-lighter">{ user.TelegramName }</span></h1>
 	<section class="user-profile flex">
 		<div class="user-info">
-			<form action="updateUser" id="form-user" hx-patch={ "/user/" + user.ID.String() } hx-target="#notification">
+			<form action="updateUser" id="form-user" hx-target="#notification">
 				@UserInfo(user)
-				<button type="submit" class="uk-button uk-button-default">Save</button>
+				<div class="flex gap-2">
+					@SaveButton(templ.Attributes{
+						"hx-patch": "/user/" + user.ID.String(),
+					})
+					@DeleteButton(templ.Attributes{
+						"hx-delete": "/user/" + user.ID.String(),
+					})
+				</div>
 			</form>
 		</div>
 		<div class="user-subscriptions">

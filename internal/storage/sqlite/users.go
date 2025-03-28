@@ -12,7 +12,7 @@ import (
 
 /* ---- Queries Interface implementation ---- */
 
-func (s *SQLStorage) GetUserByServerID(ctx context.Context, serverID storage.ServerID) (users []*storage.User, err error) {
+func (s *SQLStorage) GetUsersByServerID(ctx context.Context, serverID storage.ServerID) (users *[]storage.User, err error) {
 	q := `
 		SELECT * FROM users AS u
 		JOIN users_servers ON users.id = users_servers.user_id AS us
@@ -40,13 +40,15 @@ func (s *SQLStorage) GetUserByServerID(ctx context.Context, serverID storage.Ser
 // Limit can accept: offset, limit
 
 func (s *SQLStorage) GetUsers(ctx context.Context, args *storage.QueryArgs) (users *[]storage.User, err error) {
-
-	selectArgs := s.parseQueryArgs(args)
-
 	q := `SELECT * FROM users`
 
-	queryEnd, queryArgs := s.builder.BuildParts([]string{"where", "order_by", "limit"}, selectArgs)
-	q += queryEnd
+	var queryEnd string
+	var queryArgs []interface{}
+	if args != nil {
+		selectArgs := s.parseQueryArgs(args)
+		queryEnd, queryArgs = s.builder.BuildParts([]string{"where", "order_by", "limit"}, selectArgs)
+		q += queryEnd
+	}
 
 	users = &[]storage.User{}
 	err = s.db.SelectContext(ctx, users, q, queryArgs...)
@@ -56,6 +58,21 @@ func (s *SQLStorage) GetUsers(ctx context.Context, args *storage.QueryArgs) (use
 
 func (s *SQLStorage) GetUserByID(ctx context.Context, id storage.UserID) (user *storage.User, err error) {
 	q := `SELECT * FROM users WHERE id = ? LIMIT 1`
+
+	user = &storage.User{}
+	err = s.db.GetContext(ctx, user, q, id)
+
+	if err == sql.ErrNoRows {
+		return nil, storage.ErrNoSuchUser
+	} else if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (s *SQLStorage) GetUserByTelegramID(ctx context.Context, id storage.TelegramID) (user *storage.User, err error) {
+	q := `SELECT * FROM users WHERE telegram_id = ? LIMIT 1`
 
 	user = &storage.User{}
 	err = s.db.GetContext(ctx, user, q, id)

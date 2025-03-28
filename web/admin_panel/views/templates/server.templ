@@ -2,19 +2,27 @@ package templates
 
 import (
 	"strconv"
+	"vpn-tg-bot/internal/storage"
 	"vpn-tg-bot/web/admin_panel/entity"
 )
 
-templ ServerMain(server *entity.Server, subscriptions *[]entity.SubscriptionWithUser) {
+templ ServerMain(server *entity.Server, subscriptions *[]entity.SubscriptionWithUser, countries *[]storage.Country) {
 	<h1 class="text-3xl">
 		Server { server.Name }
 		@FlagIcon(server.CountryCode)
 	</h1>
 	<section class="server-profile flex">
 		<div class="server-info">
-			<form action="updateServer" id="form-server" hx-patch={ "/server/" + server.ID.String() } hx-target="#notification">
-				@ServerInfo(server)
-				<button type="submit" class="uk-button uk-button-default">Save</button>
+			<form action="updateServer" id="form-server" hx-target="#notification">
+				@ServerInfo(server, countries)
+				<div class="flex gap-2">
+					@SaveButton(templ.Attributes{
+						"hx-patch": "/server/" + server.ID.String(),
+					})
+					@DeleteButton(templ.Attributes{
+						"hx-delete": "/server/" + server.ID.String(),
+					})
+				</div>
 			</form>
 		</div>
 		<div class="server-subscriptions">
@@ -24,7 +32,7 @@ templ ServerMain(server *entity.Server, subscriptions *[]entity.SubscriptionWith
 	</section>
 }
 
-templ ServerInfo(server *entity.Server) {
+templ ServerInfo(server *entity.Server, countries *[]storage.Country) {
 	<div class="p-2">
 		<label class="uk-form-label" for="id">ID</label>
 		<input class="uk-input" name="id" type="text" placeholder="ID" value={ server.ID.String() } disabled/>
@@ -34,7 +42,8 @@ templ ServerInfo(server *entity.Server) {
 			Country ID
 			@FlagIcon(server.CountryCode)
 		</label>
-		<input class="uk-input" name="country_id" type="text" placeholder="Country ID" value={ server.VPNServer.CountryID.String() }/>
+		// <input class="uk-input" name="country_id" type="text" placeholder="Country ID" value={ server.VPNServer.CountryID.String() }/>
+		@DropDown("country_id", server.VPNServer.CountryID.String(), templ.Join(templ.Raw(server.CountryName+" "), FlagIcon(server.CountryCode)), CountriesDropDown(countries))
 	</div>
 	<div class="p-2">
 		<label class="uk-form-label" for="name">Name</label>

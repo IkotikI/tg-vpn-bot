@@ -8,6 +8,8 @@ import (
 	"vpn-tg-bot/pkg/clients/x-ui/model"
 )
 
+var test_inboundID_ = 5
+
 func TestLogin(t *testing.T) {
 	xui := New(TokenKey_3x_ui, server, makeAuthStore())
 
@@ -22,7 +24,7 @@ func TestAddInbound(t *testing.T) {
 	// Add Inbound
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	var inboundToAdd model.Inbound = DefaultInbound
-	// inboundToAdd.Id = 1
+	// inboundToAdd.Id = test_inboundID_
 	inbound, err := xui.AddInbound(ctx, &inboundToAdd)
 	if err != nil {
 		t.Fatalf("can't add inbound: %s", err)
@@ -44,7 +46,7 @@ func TestGetUpdateInbound(t *testing.T) {
 
 	// Get Inbound
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
-	inbound, err := xui.GetInbound(ctx, 1)
+	inbound, err := xui.GetInbound(ctx, test_inboundID_)
 	if err != nil {
 		t.Fatalf("can't get inbound: %s", err)
 	}
@@ -83,7 +85,7 @@ func TestDeleteInbound(t *testing.T) {
 
 	// Remove Inbound
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
-	err := xui.DeleteInbound(ctx, 1)
+	err := xui.DeleteInbound(ctx, test_inboundID_)
 	if err != nil {
 		t.Fatalf("can't remove inbound: %s", err)
 	}

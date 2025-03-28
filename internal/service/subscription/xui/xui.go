@@ -87,7 +87,6 @@ func (s *XUIService) SubscriptionLink(ctx context.Context, serverID storage.Serv
 
 // Update Subscription with XUI API and in the Storage.
 func (s *XUIService) UpdateSubscription(ctx context.Context, sub *storage.Subscription) (err error) {
-	defer func() { e.WrapIfErr("can't update subscription", err) }()
 
 	if sub.UserID == 0 {
 		return ErrZeroUserID
@@ -99,7 +98,7 @@ func (s *XUIService) UpdateSubscription(ctx context.Context, sub *storage.Subscr
 
 	oldSub, err := s.storage.GetSubscriptionByIDs(ctx, sub.UserID, sub.ServerID)
 	if err != nil && err != storage.ErrNoSuchSubscription {
-		return err
+		return e.Wrap("can't get old subscription", err)
 	}
 
 	if sub.SubscriptionExpiredAt.IsZero() {
@@ -129,7 +128,7 @@ func (s *XUIService) UpdateSubscription(ctx context.Context, sub *storage.Subscr
 
 	user, err := s.storage.GetUserByID(ctx, sub.UserID)
 	if err != nil {
-		return err
+		return e.Wrap(fmt.Sprintf("can't get user by id %s", sub.UserID), err)
 	}
 
 	xui, err := s.xuiClientInstance(ctx, sub.ServerID)
@@ -178,7 +177,6 @@ func (s *XUIService) UpdateSubscription(ctx context.Context, sub *storage.Subscr
 }
 
 func (s *XUIService) DeleteUserSubscription(ctx context.Context, serverID storage.ServerID, userID storage.UserID) (err error) {
-	defer func() { e.WrapIfErr("can't delete subscription", err) }()
 
 	if userID == 0 {
 		return ErrZeroUserID
@@ -208,7 +206,6 @@ func (s *XUIService) DeleteUserSubscription(ctx context.Context, serverID storag
 }
 
 func (s *XUIService) GetClientByIDs(ctx context.Context, serverID storage.ServerID, userID storage.UserID) (clientPtr *model.Client, err error) {
-	defer func() { e.WrapIfErr("can't get client", err) }()
 
 	xui, err := s.xuiClientInstance(ctx, serverID)
 	if err != nil {
@@ -306,7 +303,6 @@ func (s *XUIService) uuidFromInt64(id int64) uuid.UUID {
 }
 
 func (s *XUIService) xuiClientInstance(ctx context.Context, serverID storage.ServerID) (cli *x_ui.XUIClient, err error) {
-	defer func() { e.WrapIfErr("can't get xui client instance", err) }()
 	client, ok := s.clients[serverID]
 	if !ok {
 		// Mb defer would now work, because err variable don't make specifically?

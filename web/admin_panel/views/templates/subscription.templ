@@ -8,32 +8,33 @@ templ SubscriptionMain(sub *entity.SubscriptionWithUserAndServer) {
 	</h1>
 	<div class="relations flex">
 		<div class="from-user flex flex-col">
-			<div class="header uk-h3">User</div>
+			<div class="header uk-h5 uk-colo">User</div>
 			<div class="content flex gap-2">
-				<p>{ sub.User.ID.String() }</p>
-				<p>{ sub.User.TelegramID.String() }</p>
-				<p>{ sub.User.TelegramName }</p>
+				@UserCellItem(sub.User)
 			</div>
 		</div>
 		<div class="separator text-6xl">
 			to
 		</div>
 		<div class="to-server">
-			<div class="header uk-h3 flex flex-col">Server</div>
+			<div class="header uk-h5 flex flex-col">Server</div>
 			<div class="content flex gap-2">
-				<p>{ sub.Server.ID.String() }</p>
-				<p>
-					{ sub.Server.Name }
-					@FlagIcon(sub.Server.CountryCode)
-				</p>
+				@ServerCellItem(sub.Server)
 			</div>
 		</div>
 	</div>
 	<section class="subscription-profile flex">
 		<div class="subscription-info">
-			<form action="updateSubscription" id="form-subscription" hx-patch={ "/subscription/" + sub.Server.ID.String() + "/" + sub.User.ID.String() } hx-target="#notification">
+			<form action="updateSubscription" id="form-subscription" hx-target="#notification">
 				@SubscriptionInfo(sub)
-				<button type="submit" class="uk-button uk-button-default">Save</button>
+				<div class="flex gap-2">
+					@SaveButton(templ.Attributes{
+						"hx-patch": "/subscription/" + sub.Server.ID.String() + "/" + sub.User.ID.String(),
+					})
+					@DeleteButton(templ.Attributes{
+						"hx-delete": "/subscription/" + sub.Server.ID.String() + "/" + sub.User.ID.String(),
+					})
+				</div>
 			</form>
 		</div>
 		<div class="subscription-from-to">

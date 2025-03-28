@@ -11,7 +11,7 @@ require (
 )
 
 require (
-	github.com/a-h/templ v0.3.819 // indirect
+	github.com/a-h/templ v0.3.833 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/gorilla/sessions v1.4.0 // indirect

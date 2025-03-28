@@ -12,13 +12,14 @@ import (
 
 /* ---- Queries Interface implementation ---- */
 
-func (s *SQLStorage) GetServerByUserID(ctx context.Context, userID storage.UserID) (server []*storage.VPNServer, err error) {
+func (s *SQLStorage) GetServersByUserID(ctx context.Context, userID storage.UserID) (server *[]storage.VPNServer, err error) {
 	q := `
 		SELECT * FROM server AS s
 		JOIN servers_servers ON servers.id = servers_servers.user_id AS us
 		WHERE us.server_id = ?
 	`
 
+	server = &[]storage.VPNServer{}
 	err = s.db.GetContext(ctx, server, q, userID)
 
 	return server, err
@@ -27,15 +28,17 @@ func (s *SQLStorage) GetServerByUserID(ctx context.Context, userID storage.UserI
 /* ---- Reader Interface implementation ---- */
 
 func (s *SQLStorage) GetServers(ctx context.Context, args *storage.QueryArgs) (servers *[]storage.VPNServer, err error) {
-
-	selectArgs := s.parseQueryArgs(args)
-
 	q := `SELECT * FROM servers`
 
-	queryEnd, queryArgs := s.builder.BuildParts([]string{"where", "order_by", "limit"}, selectArgs)
-	q += " " + queryEnd
-	fmt.Printf("query: %s\n", q)
-	fmt.Printf("query args: %v\n", queryArgs)
+	var queryEnd string
+	var queryArgs []interface{}
+	if args != nil {
+		selectArgs := s.parseQueryArgs(args)
+		queryEnd, queryArgs = s.builder.BuildParts([]string{"where", "order_by", "limit"}, selectArgs)
+		q += " " + queryEnd
+		fmt.Printf("query: %s\n", q)
+		fmt.Printf("query args: %v\n", queryArgs)
+	}
 
 	servers = &[]storage.VPNServer{}
 	err = s.db.SelectContext(ctx, servers, q, queryArgs...)

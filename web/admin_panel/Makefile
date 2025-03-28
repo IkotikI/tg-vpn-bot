@@ -16,4 +16,4 @@ tailwind-watch:
 tsc: typescript
 
 typescript:
-	tsc	
+	npm run tsc	

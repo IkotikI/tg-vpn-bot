@@ -28,6 +28,10 @@ type Subscription struct {
 	storage.Subscription
 }
 
+type Country struct {
+	storage.Country
+}
+
 type SubscriptionWithServer struct {
 	Server
 	Subscription

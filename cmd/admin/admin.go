@@ -5,7 +5,9 @@ import (
 	"log"
 	"os"
 
+	xui_service "vpn-tg-bot/internal/service/subscription/xui"
 	"vpn-tg-bot/internal/storage/sqlite"
+	x_ui "vpn-tg-bot/pkg/clients/x-ui"
 	"vpn-tg-bot/web/admin_panel"
 
 	"github.com/joho/godotenv"
@@ -20,6 +22,9 @@ func main() {
 	envPath := *envPathPtr
 	log.Printf("env path: %s", envPath)
 
+	storagePath := *storagePathPtr
+	log.Printf("storage path: %s", storagePath)
+
 	if err := godotenv.Load(envPath); err != nil {
 		log.Fatalf("Error loading .env file: %v \n env path: %s", err, envPath)
 	}
@@ -29,8 +34,6 @@ func main() {
 		addr = ":8080"
 	}
 
-	storagePath := *storagePathPtr
-	log.Printf("storage path: %s", storagePath)
 	if _, err := os.Stat(storagePath); os.IsNotExist(err) {
 		log.Fatalf("[ERR]: Storage not found by given path: %s", storagePath)
 	} else if err != nil {
@@ -41,6 +44,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("[ERR]: Can't create sqlite storage instance: %v", err)
 	}
+	subsService := xui_service.NewXUIService(x_ui.TokenKey_3x_ui, storage, storage)
 
 	sessionKey := os.Getenv("ADMIN_PANEL_SESSION_KEY")
 	if sessionKey == "" && len(sessionKey) != 32 {
@@ -48,9 +52,10 @@ func main() {
 	}
 
 	settings := admin_panel.Settings{
-		Addr:       addr,
-		Storage:    storage,
-		SessionKey: sessionKey,
+		Addr:                addr,
+		Storage:             storage,
+		SessionKey:          sessionKey,
+		SubscriptionService: subsService,
 	}
 	p := admin_panel.New(settings)
 

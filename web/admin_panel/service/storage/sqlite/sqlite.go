@@ -283,9 +283,9 @@ func (s *SQLiteStorageService) GetSubscriptionsWithUsersByServerID(ctx context.C
 	return subs, nil
 }
 
-func (s *SQLiteStorageService) Count(ctx context.Context, args builder.Arguments) (n int64, err error) {
+func (s *SQLiteStorageService) CountWithBuilder(ctx context.Context, args builder.Arguments) (n int64, err error) {
 	q := `
-		SELECT count(*) AS count 
+		SELECT count(*) AS count
 	`
 
 	queryEnd, queryArgs := s.builder.BuildParts([]string{"from", "where"}, args)
