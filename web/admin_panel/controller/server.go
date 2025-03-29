@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"vpn-tg-bot/internal/storage"
 	"vpn-tg-bot/web/admin_panel/entity"
-	"vpn-tg-bot/web/admin_panel/service"
 	"vpn-tg-bot/web/admin_panel/views"
 	"vpn-tg-bot/web/admin_panel/views/templates"
 
@@ -24,21 +23,15 @@ const (
 type ServerController struct {
 	BaseController
 
-	storage service.StorageService
+	storage storage.Storage
 	// service?
 	// cookieStore *sessions.CookieStore
 	// mux         http.Handler
 }
 
 func NewServerController(r *mux.Router, storage storage.Storage) *ServerController {
-
-	storage_service, err := service.NewStorageService(storage)
-	if err != nil {
-		log.Fatalf("[ERR} Can't start storage service: %v", err)
-	}
-
 	c := &ServerController{
-		storage: storage_service,
+		storage: storage,
 	}
 	c.registerRoutes(r)
 	return c
@@ -62,7 +55,7 @@ func (c *ServerController) serverView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	server, err := c.storage.GetEntityServerByID(ctx, id)
+	server, err := c.storage.GetServerWithCountryByID(ctx, id)
 	if err == storage.ErrNoSuchServer {
 		c.writeErrorNotFound(w, ctx)
 		return

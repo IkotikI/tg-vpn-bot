@@ -55,7 +55,7 @@ function SearchableDropdown(group: HTMLElement) {
     }
     
     // Set initial state
-    toggleDropdown();
+    // toggleDropdown();
     
     dropdownButton.addEventListener('click', () => {
       toggleDropdown();

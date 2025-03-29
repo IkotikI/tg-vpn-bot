@@ -3,10 +3,9 @@ package templates
 import (
 	"strconv"
 	"vpn-tg-bot/internal/storage"
-	"vpn-tg-bot/web/admin_panel/entity"
 )
 
-templ ServerMain(server *entity.Server, subscriptions *[]entity.SubscriptionWithUser, countries *[]storage.Country) {
+templ ServerMain(server *storage.VPNServerWithCountry, subscriptions *[]storage.SubscriptionWithUser, countries *[]storage.Country) {
 	<h1 class="text-3xl">
 		Server { server.Name }
 		@FlagIcon(server.CountryCode)
@@ -32,7 +31,7 @@ templ ServerMain(server *entity.Server, subscriptions *[]entity.SubscriptionWith
 	</section>
 }
 
-templ ServerInfo(server *entity.Server, countries *[]storage.Country) {
+templ ServerInfo(server *storage.VPNServerWithCountry, countries *[]storage.Country) {
 	<div class="p-2">
 		<label class="uk-form-label" for="id">ID</label>
 		<input class="uk-input" name="id" type="text" placeholder="ID" value={ server.ID.String() } disabled/>
@@ -79,7 +78,7 @@ templ ServerInfo(server *entity.Server, countries *[]storage.Country) {
 	</div>
 }
 
-templ SubscriptionsWithUsersTable(subscriptions *[]entity.SubscriptionWithUser) {
+templ SubscriptionsWithUsersTable(subscriptions *[]storage.SubscriptionWithUser) {
 	<table id="user-subscriptions-table" class="users-table uk-table uk-table-divider uk-table-hover">
 		<thead>
 			<tr class="text-center">
@@ -102,7 +101,7 @@ templ SubscriptionsWithUsersTable(subscriptions *[]entity.SubscriptionWithUser) 
 	</table>
 }
 
-templ SubscriptionWithUserRow(s entity.SubscriptionWithUser) {
+templ SubscriptionWithUserRow(s storage.SubscriptionWithUser) {
 	{{ userLink := UserLinkT(s.UserID) }}
 	<tr>
 		<td><a href={ userLink }>{ s.UserID.String() }</a></td>

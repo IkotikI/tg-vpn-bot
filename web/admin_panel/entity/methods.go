@@ -129,7 +129,7 @@ func ParseQueryArgs(queryArgs url.Values) (args *QueryArguments) {
 	return args
 }
 
-func (a *QueryArguments) SelectArgs() (argsPtr *builder.SelectArguments) {
+func (a *QueryArguments) args() (argsPtr *builder.SelectArguments) {
 	args := builder.SelectArguments{}
 
 	args.Limit.Limit = a.PerPage

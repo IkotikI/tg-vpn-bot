@@ -139,7 +139,7 @@ func DropDown(inputName string, inputValue string, buttonContent templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" hidden><div class=\"dropdown-menu uk-background-default w-full max-h-[50vh] overflow-y-scroll hidden absolute right-0 mt-2 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 p-1 space-y-1\"><!-- Search input --><input class=\"search-input uk-input block w-full px-4 py-2 text-gray-800 border rounded-md  border-gray-300 focus:outline-none\" type=\"text\" placeholder=\"Search items\" autocomplete=\"off\"><!-- Dropdown content goes here -->")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" hidden><div class=\"hidden dropdown-menu uk-background-default w-full max-h-[50vh] overflow-y-scroll absolute right-0 mt-2 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 p-1 space-y-1\"><!-- Search input --><input class=\"search-input uk-input block w-full px-4 py-2 text-gray-800 border rounded-md  border-gray-300 focus:outline-none\" type=\"text\" placeholder=\"Search items\" autocomplete=\"off\"><!-- Dropdown content goes here -->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

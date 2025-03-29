@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"time"
+	"vpn-tg-bot/internal/storage"
 	"vpn-tg-bot/pkg/e"
 	"vpn-tg-bot/web/admin_panel/entity"
 )
@@ -63,15 +64,16 @@ func Versioned(path string) string {
 	return path + "?v=" + strconv.FormatInt(s, 10)
 }
 
-func PaginationLinks(base string, p entity.Pagination, r int) *[]entity.PaginationLink {
+func PaginationLinks(base string, p storage.Pagination, r int) *[]storage.PaginationLink {
+
 	// If 1 page, don't make mess
 	if p.TotalPages <= 1 {
-		return &[]entity.PaginationLink{{Link: base, Num: 1}}
+		return &[]storage.PaginationLink{{Link: base, Num: 1}}
 	}
 
 	// If 2 pages, it's easy too.
 	if p.TotalPages == 2 {
-		return &[]entity.PaginationLink{
+		return &[]storage.PaginationLink{
 			{Link: base + fmt.Sprintf("?&per_page=%d", p.PerPage), Num: 1},
 			{Link: base + fmt.Sprintf("?page=2&per_page=%d", p.PerPage), Num: 2},
 		}
@@ -81,10 +83,10 @@ func PaginationLinks(base string, p entity.Pagination, r int) *[]entity.Paginati
 	// Link number:  0   r   1
 	// Average capacity: 1...3,4,5,6,7...10
 	// Link number:      1  -r   0  +r   1
-	start := make([]entity.PaginationLink, 0, r+1)
-	end := make([]entity.PaginationLink, 0, r+1)
+	start := make([]storage.PaginationLink, 0, r+1)
+	end := make([]storage.PaginationLink, 0, r+1)
 
-	start = append(start, entity.PaginationLink{
+	start = append(start, storage.PaginationLink{
 		Link: base + fmt.Sprintf("?per_page=%d", p.PerPage),
 		Num:  1,
 	})
@@ -93,7 +95,7 @@ func PaginationLinks(base string, p entity.Pagination, r int) *[]entity.Paginati
 
 	// Make n-th link
 	if n != 1 && n != p.TotalPages {
-		end = append(end, entity.PaginationLink{
+		end = append(end, storage.PaginationLink{
 			Link: base + fmt.Sprintf("?page=%d&per_page=%d", n, p.PerPage),
 			Num:  n,
 		})
@@ -106,20 +108,20 @@ func PaginationLinks(base string, p entity.Pagination, r int) *[]entity.Paginati
 		l = n - int64(r) + int64(i)
 		h = n + int64(i)
 		if l > 1 {
-			start = append(start, entity.PaginationLink{
+			start = append(start, storage.PaginationLink{
 				Link: base + fmt.Sprintf("?page=%d&per_page=%d", l, p.PerPage),
 				Num:  l,
 			})
 		}
 		if h < p.TotalPages {
-			end = append(end, entity.PaginationLink{
+			end = append(end, storage.PaginationLink{
 				Link: base + fmt.Sprintf("?page=%d&per_page=%d", h, p.PerPage),
 				Num:  h,
 			})
 		}
 	}
 
-	end = append(end, entity.PaginationLink{
+	end = append(end, storage.PaginationLink{
 		Link: base + fmt.Sprintf("?page=%d&per_page=%d", p.TotalPages, p.PerPage),
 		Num:  p.TotalPages,
 	})

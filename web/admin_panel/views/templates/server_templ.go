@@ -11,10 +11,9 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"strconv"
 	"vpn-tg-bot/internal/storage"
-	"vpn-tg-bot/web/admin_panel/entity"
 )
 
-func ServerMain(server *entity.Server, subscriptions *[]entity.SubscriptionWithUser, countries *[]storage.Country) templ.Component {
+func ServerMain(server *storage.VPNServerWithCountry, subscriptions *[]storage.SubscriptionWithUser, countries *[]storage.Country) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -42,7 +41,7 @@ func ServerMain(server *entity.Server, subscriptions *[]entity.SubscriptionWithU
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(server.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 11, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 10, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -92,7 +91,7 @@ func ServerMain(server *entity.Server, subscriptions *[]entity.SubscriptionWithU
 	})
 }
 
-func ServerInfo(server *entity.Server, countries *[]storage.Country) templ.Component {
+func ServerInfo(server *storage.VPNServerWithCountry, countries *[]storage.Country) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -120,7 +119,7 @@ func ServerInfo(server *entity.Server, countries *[]storage.Country) templ.Compo
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(server.ID.String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 38, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 37, Col: 91}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -149,7 +148,7 @@ func ServerInfo(server *entity.Server, countries *[]storage.Country) templ.Compo
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(server.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 50, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 49, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -162,7 +161,7 @@ func ServerInfo(server *entity.Server, countries *[]storage.Country) templ.Compo
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(server.Protocol)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 54, Col: 100}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 53, Col: 100}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -175,7 +174,7 @@ func ServerInfo(server *entity.Server, countries *[]storage.Country) templ.Compo
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(server.Host)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 58, Col: 88}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 57, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -188,7 +187,7 @@ func ServerInfo(server *entity.Server, countries *[]storage.Country) templ.Compo
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(server.Port))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 62, Col: 102}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 61, Col: 102}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -201,7 +200,7 @@ func ServerInfo(server *entity.Server, countries *[]storage.Country) templ.Compo
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(server.Username)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 66, Col: 100}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 65, Col: 100}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -214,7 +213,7 @@ func ServerInfo(server *entity.Server, countries *[]storage.Country) templ.Compo
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(server.Password)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 70, Col: 100}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 69, Col: 100}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -227,7 +226,7 @@ func ServerInfo(server *entity.Server, countries *[]storage.Country) templ.Compo
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(server.CreatedAt.Format("02.01.2006 15:04"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 74, Col: 132}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 73, Col: 132}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -240,7 +239,7 @@ func ServerInfo(server *entity.Server, countries *[]storage.Country) templ.Compo
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(server.UpdatedAt.Format("02.01.2006 15:04"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 78, Col: 132}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 77, Col: 132}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -254,7 +253,7 @@ func ServerInfo(server *entity.Server, countries *[]storage.Country) templ.Compo
 	})
 }
 
-func SubscriptionsWithUsersTable(subscriptions *[]entity.SubscriptionWithUser) templ.Component {
+func SubscriptionsWithUsersTable(subscriptions *[]storage.SubscriptionWithUser) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -293,7 +292,7 @@ func SubscriptionsWithUsersTable(subscriptions *[]entity.SubscriptionWithUser) t
 	})
 }
 
-func SubscriptionWithUserRow(s entity.SubscriptionWithUser) templ.Component {
+func SubscriptionWithUserRow(s storage.SubscriptionWithUser) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -331,7 +330,7 @@ func SubscriptionWithUserRow(s entity.SubscriptionWithUser) templ.Component {
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(s.UserID.String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 108, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 107, Col: 46}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -353,7 +352,7 @@ func SubscriptionWithUserRow(s entity.SubscriptionWithUser) templ.Component {
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(s.TelegramID.String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 109, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 108, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -375,7 +374,7 @@ func SubscriptionWithUserRow(s entity.SubscriptionWithUser) templ.Component {
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(s.TelegramName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 110, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 109, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -388,7 +387,7 @@ func SubscriptionWithUserRow(s entity.SubscriptionWithUser) templ.Component {
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(s.SubscriptionStatus)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 111, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 110, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -401,7 +400,7 @@ func SubscriptionWithUserRow(s entity.SubscriptionWithUser) templ.Component {
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(s.SubscriptionExpiredAt.Format("02.01.2006 15:04"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 112, Col: 58}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/server.templ`, Line: 111, Col: 58}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {

@@ -1,8 +1,8 @@
 package templates
 
-import "vpn-tg-bot/web/admin_panel/entity"
+import "vpn-tg-bot/internal/storage"
 
-templ SubscriptionMain(sub *entity.SubscriptionWithUserAndServer) {
+templ SubscriptionMain(sub *storage.SubscriptionWithUserAndServer) {
 	<h1 class="uk-h1">
 		Subscription
 	</h1>
@@ -19,7 +19,7 @@ templ SubscriptionMain(sub *entity.SubscriptionWithUserAndServer) {
 		<div class="to-server">
 			<div class="header uk-h5 flex flex-col">Server</div>
 			<div class="content flex gap-2">
-				@ServerCellItem(sub.Server)
+				@ServerCellItem(sub.VPNServerWithCountry)
 			</div>
 		</div>
 	</div>
@@ -29,10 +29,10 @@ templ SubscriptionMain(sub *entity.SubscriptionWithUserAndServer) {
 				@SubscriptionInfo(sub)
 				<div class="flex gap-2">
 					@SaveButton(templ.Attributes{
-						"hx-patch": "/subscription/" + sub.Server.ID.String() + "/" + sub.User.ID.String(),
+						"hx-patch": "/subscription/" + sub.VPNServerWithCountry.ID.String() + "/" + sub.User.ID.String(),
 					})
 					@DeleteButton(templ.Attributes{
-						"hx-delete": "/subscription/" + sub.Server.ID.String() + "/" + sub.User.ID.String(),
+						"hx-delete": "/subscription/" + sub.VPNServerWithCountry.ID.String() + "/" + sub.User.ID.String(),
 					})
 				</div>
 			</form>
@@ -44,14 +44,14 @@ templ SubscriptionMain(sub *entity.SubscriptionWithUserAndServer) {
 	</section>
 }
 
-templ SubscriptionInfo(sub *entity.SubscriptionWithUserAndServer) {
+templ SubscriptionInfo(sub *storage.SubscriptionWithUserAndServer) {
 	<div class="p-2">
 		<label class="uk-form-label" for="user_id">User ID</label>
 		<input class="uk-input" name="user_id" type="text" placeholder="User ID" value={ sub.User.ID.String() } disabled/>
 	</div>
 	<div class="p-2">
 		<label class="uk-form-label" for="server_id">Server ID</label>
-		<input class="uk-input" name="server_id" type="text" placeholder="Server ID" value={ sub.Server.ID.String() } disabled/>
+		<input class="uk-input" name="server_id" type="text" placeholder="Server ID" value={ sub.VPNServerWithCountry.ID.String() } disabled/>
 	</div>
 	<div class="p-2">
 		<label class="uk-form-label" for="subscription_status">Status</label>
@@ -63,9 +63,9 @@ templ SubscriptionInfo(sub *entity.SubscriptionWithUserAndServer) {
 	</div>
 }
 
-templ SubscriptionFromToTable(sub *entity.SubscriptionWithUserAndServer) {
+templ SubscriptionFromToTable(sub *storage.SubscriptionWithUserAndServer) {
 	{{ userLink := UserLinkT(sub.User.ID) }}
-	{{ serverLink := ServerLinkT(sub.Server.ID) }}
+	{{ serverLink := ServerLinkT(sub.VPNServer.ID) }}
 	<table id="user-subscription-from-to-table" class="users-table uk-table uk-table-divider uk-table-hover">
 		<thead>
 			<tr class="text-center">
@@ -85,12 +85,12 @@ templ SubscriptionFromToTable(sub *entity.SubscriptionWithUserAndServer) {
 				<td><a href={ userLink }>{ sub.UserID.String() }</a></td>
 				<td><a href={ userLink }>{ sub.User.TelegramID.String() }</a></td>
 				<td><a href={ userLink }>{ sub.User.TelegramName }</a></td>
-				<td><a href={ serverLink }>{ sub.ServerID.String() }</a></td>
+				<td><a href={ serverLink }>{ sub.VPNServerWithCountry.ID.String() }</a></td>
 				<td>
-					@FlagIcon(sub.Server.CountryCode)
-					{ sub.Server.CountryCode }
+					@FlagIcon(sub.VPNServerWithCountry.CountryCode)
+					{ sub.VPNServerWithCountry.CountryCode }
 				</td>
-				<td><a href={ serverLink }>{ sub.Server.Name }</a></td>
+				<td><a href={ serverLink }>{ sub.VPNServerWithCountry.Name }</a></td>
 			</tr>
 		</tbody>
 	</table>

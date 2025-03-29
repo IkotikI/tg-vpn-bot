@@ -2,10 +2,10 @@ package templates
 
 import (
 	"strconv"
-	"vpn-tg-bot/web/admin_panel/entity"
+	"vpn-tg-bot/internal/storage"
 )
 
-templ ServersTable(servers *[]entity.Server) {
+templ ServersTable(servers *[]storage.VPNServerWithCountry) {
 	<table class="uk-table uk-table-divider uk-table-hover">
 		<thead>
 			<tr>
@@ -29,7 +29,7 @@ templ ServersTable(servers *[]entity.Server) {
 	</table>
 }
 
-templ ServerRow(server entity.Server) {
+templ ServerRow(server storage.VPNServerWithCountry) {
 	{{ serverLink := ServerLinkT(server.ID) }}
 	<tr>
 		<td><a href={ serverLink }>{ server.ID.String() }</a></td>

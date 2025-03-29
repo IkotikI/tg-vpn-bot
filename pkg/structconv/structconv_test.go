@@ -8,7 +8,6 @@ import (
 	"time"
 	"vpn-tg-bot/internal/storage"
 	"vpn-tg-bot/pkg/debug"
-	"vpn-tg-bot/web/admin_panel/entity"
 )
 
 func TestFunctions1(t *testing.T) {
@@ -45,7 +44,7 @@ func TestFunctions1(t *testing.T) {
 }
 func TestFunctions2(t *testing.T) {
 
-	userWithSubscription := &entity.UserWithSubscription{
+	userWithSubscription := &storage.UserWithSubscription{
 		User: storage.User{
 			ID:           1,
 			TelegramName: "test",
@@ -68,7 +67,7 @@ func TestFunctions2(t *testing.T) {
 		fmt.Printf("Field: %s, Type: %s\n", field.Name, field.Type)
 	}
 
-	basicStruct := &entity.UserWithSubscription{}
+	basicStruct := &storage.UserWithSubscription{}
 	ConvertSQLNullStructToBasic(nullStruct, basicStruct)
 
 	if reflect.TypeOf(*userWithSubscription) != reflect.TypeOf(*basicStruct) {
@@ -81,7 +80,7 @@ func TestFunctions2(t *testing.T) {
 
 func TestParseDefaultsStrict(t *testing.T) {
 
-	userWithSubscriptionDefault := &entity.UserWithSubscription{
+	userWithSubscriptionDefault := &storage.UserWithSubscription{
 		User: storage.User{
 			ID:           1,
 			TelegramID:   storage.TelegramID(hashStringToInt64("test")),
@@ -97,7 +96,7 @@ func TestParseDefaultsStrict(t *testing.T) {
 		},
 	}
 
-	userWithSubscription := &entity.UserWithSubscription{
+	userWithSubscription := &storage.UserWithSubscription{
 		User: storage.User{
 			TelegramID:   storage.TelegramID(hashStringToInt64("test_new")),
 			TelegramName: "test_new",

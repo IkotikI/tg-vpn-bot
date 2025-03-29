@@ -43,7 +43,7 @@ function SearchableDropdown(group) {
         dropdownMenu.classList.toggle('hidden', !isOpen);
     }
     // Set initial state
-    toggleDropdown();
+    // toggleDropdown();
     dropdownButton.addEventListener('click', () => {
         toggleDropdown();
         searchInput.focus();

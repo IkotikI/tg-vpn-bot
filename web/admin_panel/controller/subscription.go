@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"vpn-tg-bot/internal/storage"
 	"vpn-tg-bot/web/admin_panel/entity"
-	"vpn-tg-bot/web/admin_panel/service"
 	"vpn-tg-bot/web/admin_panel/views"
 	"vpn-tg-bot/web/admin_panel/views/templates"
 
@@ -21,21 +20,15 @@ var ErrMsgSubscriptionNotFound = "Subscription not found."
 type SubscriptionController struct {
 	BaseController
 
-	storage service.StorageService
+	storage storage.Storage
 	// service?
 	// cookieStore *sessions.CookieStore
 	// mux         http.Handler
 }
 
 func NewSubscriptionController(r *mux.Router, storage storage.Storage) *SubscriptionController {
-
-	storage_service, err := service.NewStorageService(storage)
-	if err != nil {
-		log.Fatalf("[ERR} Can't start storage service: %v", err)
-	}
-
 	c := &SubscriptionController{
-		storage: storage_service,
+		storage: storage,
 	}
 	c.registerRoutes(r)
 	return c
@@ -77,7 +70,7 @@ func (c *SubscriptionController) subscriptionView(w http.ResponseWriter, r *http
 		return
 	}
 	// var statusMsgs []string
-	// sub := &entity.SubscriptionWithUserAndServer{}
+	// sub := &storage.SubscriptionWithUserAndServer{}
 
 	// subscription, err := c.storage.GetSubscriptionByIDs(ctx, UserID, ServerID)
 	// if err != nil {
@@ -87,14 +80,14 @@ func (c *SubscriptionController) subscriptionView(w http.ResponseWriter, r *http
 
 	// user, err := c.storage.GetUserByID(ctx, UserID)
 	// if err != nil {
-	// 	sub.User = entity.User{}
+	// 	sub.User = storage.User{}
 	// 	statusMsgs = append(statusMsgs, "Error get User")
 	// 	log.Printf("[ERR] SubscriptionController: subscriptionView: %v", err)
 	// }
 
-	// server, err := c.storage.GetEntityServerByID(ctx, ServerID)
+	// server, err := c.storage.GetServerByID(ctx, ServerID)
 	// if err != nil {
-	// 	sub.Server = entity.Server{}
+	// 	sub.Server = storage.VPNServerWithCountry{}
 	// 	statusMsgs = append(statusMsgs, "Error get Server")
 	// 	log.Printf("[ERR] SubscriptionController: subscriptionView: %v", err)
 	// }
@@ -103,7 +96,7 @@ func (c *SubscriptionController) subscriptionView(w http.ResponseWriter, r *http
 
 	// sub.Subscription.ParseDefaultsFrom(subscription)
 	// sub.User.ParseDefaultsFrom(user)
-	// sub.Server.ParseDefaultsFrom(server)
+	// sub.VPNServer.ParseDefaultsFrom(server)
 
 	log.Printf("got subscription before render: \n%+v\n", sub)
 

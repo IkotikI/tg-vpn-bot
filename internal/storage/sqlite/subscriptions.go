@@ -8,6 +8,22 @@ import (
 
 /* ---- Interface implementation ---- */
 
+func (s *SQLStorage) GetSubscriptions(ctx context.Context, args *storage.QueryArgs) (subs *[]storage.Subscription, err error) {
+	q := `
+		SELECT * FROM subscriptions
+	`
+	queryEnd, queryArgs := s.buildParts([]string{"where", "order_by", "limit"}, args)
+	q += queryEnd
+
+	subs = &[]storage.Subscription{}
+	err = s.db.SelectContext(ctx, subs, q, queryArgs...)
+	if err != nil {
+		return nil, err
+	}
+
+	return subs, nil
+}
+
 /* ---- Writer Interface impoelementation ---- */
 
 func (s *SQLStorage) SaveSubscription(ctx context.Context, sub *storage.Subscription) (err error) {

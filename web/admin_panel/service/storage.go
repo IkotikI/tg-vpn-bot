@@ -6,23 +6,22 @@ import (
 	"vpn-tg-bot/internal/storage"
 	"vpn-tg-bot/internal/storage/sqlite"
 	"vpn-tg-bot/pkg/sqlbuilder/builder"
-	"vpn-tg-bot/web/admin_panel/entity"
 	sqlite_service "vpn-tg-bot/web/admin_panel/service/storage/sqlite"
 )
 
 type StorageServiceQueries interface {
-	GetEntityUsers(ctx context.Context, args builder.Arguments) (*[]entity.User, error)
-	GetEntityServers(ctx context.Context, args builder.Arguments) (*[]entity.Server, error)
-	GetEntityServerByID(ctx context.Context, serverID storage.ServerID) (*entity.Server, error)
-	GetSubscriptionsWithServersByUserID(ctx context.Context, user_id storage.UserID, args builder.Arguments) (*[]entity.SubscriptionWithServer, error)
-	GetSubscriptionsWithUsersByServerID(ctx context.Context, user_id storage.ServerID, args builder.Arguments) (*[]entity.SubscriptionWithUser, error)
-	GetSubscriptionsWithUsersAndServers(ctx context.Context, args builder.Arguments) (*[]entity.SubscriptionWithUserAndServer, error)
-	GetSubscriptionWithUserAndServerByIDs(ctx context.Context, userID storage.UserID, serverID storage.ServerID) (*entity.SubscriptionWithUserAndServer, error)
+	GetUsers(ctx context.Context, args builder.Arguments) (*[]storage.User, error)
+	GetServers(ctx context.Context, args builder.Arguments) (*[]storage.VPNServerWithCountry, error)
+	GetServerByID(ctx context.Context, serverID storage.ServerID) (*storage.VPNServerWithCountry, error)
+	GetSubscriptionsWithServersByUserID(ctx context.Context, user_id storage.UserID, args builder.Arguments) (*[]storage.SubscriptionWithServer, error)
+	GetSubscriptionsWithUsersByServerID(ctx context.Context, user_id storage.ServerID, args builder.Arguments) (*[]storage.SubscriptionWithUser, error)
+	GetSubscriptionsWithUsersAndServers(ctx context.Context, args builder.Arguments) (*[]storage.SubscriptionWithUserAndServer, error)
+	GetSubscriptionWithUserAndServerByIDs(ctx context.Context, userID storage.UserID, serverID storage.ServerID) (*storage.SubscriptionWithUserAndServer, error)
 	CountWithBuilder(ctx context.Context, args builder.Arguments) (n int64, err error)
 }
 
 type StorageService interface {
-	storage.Storage
+	// storage.Storage
 	StorageServiceQueries
 }
 

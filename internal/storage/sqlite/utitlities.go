@@ -15,11 +15,8 @@ func (s *SQLStorage) Count(ctx context.Context, args *storage.QueryArgs) (n int6
 
 	var queryEnd string
 	var queryArgs []interface{}
-	if args != nil {
-		selectArgs := s.parseQueryArgs(args)
-		queryEnd, queryArgs = s.builder.BuildParts([]string{"from", "where"}, selectArgs)
-		q += queryEnd
-	}
+	queryEnd, queryArgs = s.buildParts([]string{"from", "where"}, args)
+	q += queryEnd
 
 	log.Printf("query: `%s` args: %+v", q, queryArgs)
 	count := &[]int64{}
@@ -56,4 +53,38 @@ func (s *SQLStorage) parseQueryArgs(args *storage.QueryArgs) (a *builder.SelectA
 	selectArgs.Where = where
 
 	return &selectArgs
+}
+
+func (s *SQLStorage) buildParts(parts []string, args *storage.QueryArgs) (query string, queryArgs []interface{}) {
+	if args == nil {
+		return "", []interface{}{}
+	}
+	bulderArgs := s.parseQueryArgs(args)
+	return s.builder.BuildParts(parts, bulderArgs)
+}
+
+func (s *SQLStorage) MakePagination(ctx context.Context, db storage.Storage, table storage.Table, queryArgs *storage.QueryArguments, args *storage.QueryArgs) (storage.Pagination, error) {
+	if queryArgs == nil {
+		queryArgs = storage.DefaultQueryArguments
+	}
+	if args == nil {
+		args = queryArgs.ToQueryArgs()
+	}
+	args.From = storage.Table(table)
+
+	n, err := db.CountWithBuilder(ctx, args)
+	if err != nil {
+		return storage.Pagination{}, err
+	}
+	total_pages := n / queryArgs.PerPage
+	if n-total_pages > 0 {
+		total_pages += 1
+	}
+	return storage.Pagination{
+		Table:        table,
+		RecordsCount: n,
+		TotalPages:   total_pages,
+		Page:         queryArgs.Page,
+		PerPage:      queryArgs.PerPage,
+	}, nil
 }

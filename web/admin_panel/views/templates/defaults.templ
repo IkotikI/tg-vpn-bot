@@ -2,7 +2,7 @@ package templates
 
 import (
 	"strconv"
-	"vpn-tg-bot/web/admin_panel/entity"
+	"vpn-tg-bot/internal/storage"
 )
 
 templ DefaultHeader(items map[string]templ.Component) {
@@ -34,7 +34,7 @@ templ DefaultMain() {
 templ DefaultRightSidebar() {
 }
 
-templ DefaultPagination(paginationLinks *[]entity.PaginationLink) {
+templ DefaultPagination(paginationLinks *[]storage.PaginationLink) {
 	<div hx-boost="true" class="flex gap-2">
 		{{ var lastNum int64 = 0 }}
 		for _, link := range *paginationLinks {

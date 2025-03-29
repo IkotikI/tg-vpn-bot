@@ -19,6 +19,7 @@ type Storage interface {
 	Subscriptions
 	Countries
 	Utilities
+	Queries
 }
 
 /* ---- Simple Types ---- */
@@ -202,24 +203,12 @@ type SQLCompatible interface {
 	SQLStorageInstance() (*sql.DB, error)
 }
 
-// type SQLStorage struct {
-// 	db *sql.DB
-// }
-
-// func NewSQLStorage(db *sql.DB) *SQLStorage {
-// 	return &SQLStorage{db: db}
-// }
-
-// func (s *SQLStorage) SQLStorageInstance() (*sql.DB, error) {
-// 	return s.db, nil
-// }
-
 type SQLStorage interface {
 	Storage
 	SQLCompatible
 }
 
-/* --- Tables ---- */
+/* ---- Tables ---- */
 type Table string
 
 const (
@@ -230,7 +219,9 @@ const (
 	TableServerAuthorizations Table = "server_authorizations"
 )
 
-/* --- Query --- */
+/* ---- Query ---- */
+// Provide abstract arguments for making SQL queries.
+// Concrete implementation lies on chosen
 type QueryArgs struct {
 	From    Table
 	Where   []Where
@@ -263,53 +254,3 @@ const (
 	OrderASC  Order = "ASC"
 	OrderDECS Order = "DESC"
 )
-
-/* ---- Builder Interface ---- */
-// For making complex requests need to provide a Builder.
-// Builder provide methods:
-// - Build: build full requests;
-// - BuildParts: build parts of requests, that would joined in PartsOrder of BuilderArguments.
-// Both returns string query and slice of arguments.
-//
-// See: pkg/sqlbuilder
-//
-// Example Implementation:
-// type ConcreteBuilder struct {}
-// type ConcreteArguments struct {
-// 	Arg1 any
-// 	Arg2 any
-// }
-// func (b *ConcreteBuilder) Build(args interface{}) (query string, queryArgs []interface{}) {
-// 	for _, partName := range args.PartsOrder() {
-// 		queryPart, partArgs := args.BuildPartByName(partName, b)
-// 		query += queryPart
-// 		queryArgs = append(queryArgs, partArgs...)
-// 	}
-// 	return
-// }
-// // Like Build, but filter parts from give slice and join them in parts order.
-// func (b *ConcreteBuilder) BuildParts(parts []string, args interface{}) (query string, queryArgs []interface{}) {...}
-// func (a *ConcreteArguments) BuildPartByName(partName string, b Builder) (queryPart string, partArgs []interface{}) {
-// 	switch partName {
-// 	case "partName1":
-// 		return b.BuildPart1(a.Arg1)
-// 	case "partName2":
-// 		return b.BuildPart2(a.Arg2)
-// 	}
-// }
-// func (a *ConcreteArguments) PartsOrder() []string { return []string{"partName1", "partName2"} }
-//
-type Builder interface {
-	Build(args interface{}) (query string, queryArgs []interface{})
-	BuildParts(parts []string, args interface{}) (query string, queryArgs []interface{})
-	ValidateArgs(args interface{}) error
-}
-
-// Builder Arguments provide methods:
-//   - BuildPartByName: build part of request by string name,
-//     returns string query part and slice of arguments;
-//   - PartsOrder: should provide Names of available parts in correct order.
-// type BuilderArguments interface {
-// 	BuildPartByName(partName string, b Builder) (queryPart string, partArgs []interface{})
-// 	PartsOrder() []string
-// }

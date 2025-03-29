@@ -8,9 +8,9 @@ package templates
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "vpn-tg-bot/web/admin_panel/entity"
+import "vpn-tg-bot/internal/storage"
 
-func SubscriptionMain(sub *entity.SubscriptionWithUserAndServer) templ.Component {
+func SubscriptionMain(sub *storage.SubscriptionWithUserAndServer) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -43,7 +43,7 @@ func SubscriptionMain(sub *entity.SubscriptionWithUserAndServer) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = ServerCellItem(sub.Server).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ServerCellItem(sub.VPNServerWithCountry).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -60,13 +60,13 @@ func SubscriptionMain(sub *entity.SubscriptionWithUserAndServer) templ.Component
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = SaveButton(templ.Attributes{
-			"hx-patch": "/subscription/" + sub.Server.ID.String() + "/" + sub.User.ID.String(),
+			"hx-patch": "/subscription/" + sub.VPNServerWithCountry.ID.String() + "/" + sub.User.ID.String(),
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = DeleteButton(templ.Attributes{
-			"hx-delete": "/subscription/" + sub.Server.ID.String() + "/" + sub.User.ID.String(),
+			"hx-delete": "/subscription/" + sub.VPNServerWithCountry.ID.String() + "/" + sub.User.ID.String(),
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -87,7 +87,7 @@ func SubscriptionMain(sub *entity.SubscriptionWithUserAndServer) templ.Component
 	})
 }
 
-func SubscriptionInfo(sub *entity.SubscriptionWithUserAndServer) templ.Component {
+func SubscriptionInfo(sub *storage.SubscriptionWithUserAndServer) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -126,9 +126,9 @@ func SubscriptionInfo(sub *entity.SubscriptionWithUserAndServer) templ.Component
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(sub.Server.ID.String())
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(sub.VPNServerWithCountry.ID.String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/subscription.templ`, Line: 54, Col: 109}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/subscription.templ`, Line: 54, Col: 123}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -168,7 +168,7 @@ func SubscriptionInfo(sub *entity.SubscriptionWithUserAndServer) templ.Component
 	})
 }
 
-func SubscriptionFromToTable(sub *entity.SubscriptionWithUserAndServer) templ.Component {
+func SubscriptionFromToTable(sub *storage.SubscriptionWithUserAndServer) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -190,7 +190,7 @@ func SubscriptionFromToTable(sub *entity.SubscriptionWithUserAndServer) templ.Co
 		}
 		ctx = templ.ClearChildren(ctx)
 		userLink := UserLinkT(sub.User.ID)
-		serverLink := ServerLinkT(sub.Server.ID)
+		serverLink := ServerLinkT(sub.VPNServer.ID)
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<table id=\"user-subscription-from-to-table\" class=\"users-table uk-table uk-table-divider uk-table-hover\"><thead><tr class=\"text-center\"><th class=\"!border-r border-border\" colspan=\"3\">From User</th><th colspan=\"3\">To Server</th></tr><tr><th>ID</th><th>Tg ID</th><th>Tg Name</th><th>ID</th><th colspan=\"2\">Name</th></tr></thead> <tbody><tr><td><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -271,9 +271,9 @@ func SubscriptionFromToTable(sub *entity.SubscriptionWithUserAndServer) templ.Co
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var15 string
-		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(sub.ServerID.String())
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(sub.VPNServerWithCountry.ID.String())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/subscription.templ`, Line: 88, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/subscription.templ`, Line: 88, Col: 69}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -283,14 +283,14 @@ func SubscriptionFromToTable(sub *entity.SubscriptionWithUserAndServer) templ.Co
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = FlagIcon(sub.Server.CountryCode).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = FlagIcon(sub.VPNServerWithCountry.CountryCode).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var16 string
-		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(sub.Server.CountryCode)
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(sub.VPNServerWithCountry.CountryCode)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/subscription.templ`, Line: 91, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/subscription.templ`, Line: 91, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -310,9 +310,9 @@ func SubscriptionFromToTable(sub *entity.SubscriptionWithUserAndServer) templ.Co
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 string
-		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(sub.Server.Name)
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(sub.VPNServerWithCountry.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/subscription.templ`, Line: 93, Col: 48}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/admin_panel/views/templates/subscription.templ`, Line: 93, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {

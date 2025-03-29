@@ -36,7 +36,7 @@ package sqlite_service
 // 	}
 // }
 
-// func (s *SQLiteStorageService) ChangeSubscriptionStatus(ctx context.Context, args builder.Arguments) (subscription *entity.Subscription, err error) {
+// func (s *SQLiteStorageService) ChangeSubscriptionStatus(ctx context.Context, args builder.Arguments) (subscription *storage.Subscription, err error) {
 // 	defer func() { e.WrapIfErr("can't change subscription status", err) }()
 
 // 	return nil, nil

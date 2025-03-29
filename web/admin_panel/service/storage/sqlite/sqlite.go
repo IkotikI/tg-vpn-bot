@@ -11,7 +11,6 @@ import (
 	"vpn-tg-bot/pkg/sqlbuilder"
 	"vpn-tg-bot/pkg/sqlbuilder/builder"
 	"vpn-tg-bot/pkg/structconv"
-	"vpn-tg-bot/web/admin_panel/entity"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -42,14 +41,14 @@ func New(storage storage.SQLStorage) *SQLiteStorageService {
 	}
 }
 
-func (s *SQLiteStorageService) GetEntityUsers(ctx context.Context, args builder.Arguments) (users *[]entity.User, err error) {
+func (s *SQLiteStorageService) GetUsers(ctx context.Context, args builder.Arguments) (users *[]storage.User, err error) {
 	q := `SELECT * FROM users`
 
 	queryEnd, queryArgs := s.builder.BuildParts([]string{"where", "order_by", "limit"}, args)
 	q += queryEnd
 	log.Printf("query: `%s` args: %+v", q, queryArgs)
 
-	users = &[]entity.User{}
+	users = &[]storage.User{}
 	err = SelectContextWithNullFallback(ctx, s.db, users, q, queryArgs...)
 	if err != nil {
 		return nil, err
@@ -59,7 +58,7 @@ func (s *SQLiteStorageService) GetEntityUsers(ctx context.Context, args builder.
 
 }
 
-func (s *SQLiteStorageService) GetEntityServers(ctx context.Context, args builder.Arguments) (servers *[]entity.Server, err error) {
+func (s *SQLiteStorageService) GetServers(ctx context.Context, args builder.Arguments) (servers *[]storage.VPNServerWithCountry, err error) {
 	q := `
 		SELECT * FROM servers AS s
 		LEFT JOIN countries AS c
@@ -70,7 +69,7 @@ func (s *SQLiteStorageService) GetEntityServers(ctx context.Context, args builde
 	q += queryEnd
 	log.Printf("query: `%s` args: %+v", q, queryArgs)
 
-	servers = &[]entity.Server{}
+	servers = &[]storage.VPNServerWithCountry{}
 	err = SelectContextWithNullFallback(ctx, s.db, servers, q, queryArgs...)
 	if err != nil {
 		return nil, err
@@ -79,7 +78,7 @@ func (s *SQLiteStorageService) GetEntityServers(ctx context.Context, args builde
 	return servers, nil
 }
 
-func (s *SQLiteStorageService) GetEntityServerByID(ctx context.Context, id storage.ServerID) (server *entity.Server, err error) {
+func (s *SQLiteStorageService) GetServerByID(ctx context.Context, id storage.ServerID) (server *storage.VPNServerWithCountry, err error) {
 	q := `
 		SELECT * FROM servers AS s
 		JOIN countries AS c
@@ -87,7 +86,7 @@ func (s *SQLiteStorageService) GetEntityServerByID(ctx context.Context, id stora
 		WHERE id = ? LIMIT 1
 	`
 
-	server = &entity.Server{}
+	server = &storage.VPNServerWithCountry{}
 
 	err = GetContextWithNullFallback(ctx, s.db, server, q, id)
 	if err != nil {
@@ -98,14 +97,14 @@ func (s *SQLiteStorageService) GetEntityServerByID(ctx context.Context, id stora
 }
 
 // TODO: Move to storage & make functions to get Users and Servers by ID slice
-func (s *SQLiteStorageService) GetSubscriptions(ctx context.Context, args builder.Arguments) (subs *[]entity.Subscription, err error) {
+func (s *SQLiteStorageService) GetSubscriptions(ctx context.Context, args builder.Arguments) (subs *[]storage.Subscription, err error) {
 	q := `
 		SELECT * FROM subscriptions
 	`
 	queryEnd, queryArgs := s.builder.BuildParts([]string{"where", "order_by", "limit"}, args)
 	q += queryEnd
 
-	subs = &[]entity.Subscription{}
+	subs = &[]storage.Subscription{}
 	err = SelectContextWithNullFallback(ctx, s.db, subs, q, queryArgs...)
 	if err != nil {
 		return nil, err
@@ -114,7 +113,7 @@ func (s *SQLiteStorageService) GetSubscriptions(ctx context.Context, args builde
 	return subs, nil
 }
 
-func (s *SQLiteStorageService) GetSubscriptionWithUserAndServerByIDs(ctx context.Context, userID storage.UserID, serverID storage.ServerID) (sub *entity.SubscriptionWithUserAndServer, err error) {
+func (s *SQLiteStorageService) GetSubscriptionWithUserAndServerByIDs(ctx context.Context, userID storage.UserID, serverID storage.ServerID) (sub *storage.SubscriptionWithUserAndServer, err error) {
 	q := `
 		SELECT * FROM subscriptions AS sub
 		LEFT JOIN users AS u
@@ -127,7 +126,7 @@ func (s *SQLiteStorageService) GetSubscriptionWithUserAndServerByIDs(ctx context
 		LIMIT 1
 	`
 
-	sub = &entity.SubscriptionWithUserAndServer{}
+	sub = &storage.SubscriptionWithUserAndServer{}
 	err = GetContextWithNullFallback(ctx, s.db, sub, q, userID, serverID)
 	if err == sql.ErrNoRows {
 		return nil, storage.ErrNoSuchSubscription
@@ -138,7 +137,7 @@ func (s *SQLiteStorageService) GetSubscriptionWithUserAndServerByIDs(ctx context
 	return sub, err
 }
 
-func (s *SQLiteStorageService) GetSubscriptionsWithUsersAndServers(ctx context.Context, args builder.Arguments) (subs *[]entity.SubscriptionWithUserAndServer, err error) {
+func (s *SQLiteStorageService) GetSubscriptionsWithUsersAndServers(ctx context.Context, args builder.Arguments) (subs *[]storage.SubscriptionWithUserAndServer, err error) {
 	q := `
 		SELECT * FROM subscriptions AS sub
 		LEFT JOIN users AS u
@@ -152,7 +151,7 @@ func (s *SQLiteStorageService) GetSubscriptionsWithUsersAndServers(ctx context.C
 	queryEnd, queryArgs := s.builder.BuildParts([]string{"where", "order_by", "limit"}, args)
 	q += queryEnd
 
-	subs = &[]entity.SubscriptionWithUserAndServer{}
+	subs = &[]storage.SubscriptionWithUserAndServer{}
 	err = SelectContextWithNullFallback(ctx, s.db, subs, q, queryArgs...)
 	if err != nil {
 		return nil, err
@@ -161,7 +160,7 @@ func (s *SQLiteStorageService) GetSubscriptionsWithUsersAndServers(ctx context.C
 	return subs, err
 }
 
-// func (s *SQLiteStorageService) GetSubscriptionsWithUsersAndServers(ctx context.Context, args builder.Arguments) (subs *[]entity.SubscriptionWithUserAndServer, errs []error) {
+// func (s *SQLiteStorageService) GetSubscriptionsWithUsersAndServers(ctx context.Context, args builder.Arguments) (subs *[]storage.SubscriptionWithUserAndServer, errs []error) {
 // 	errs = make([]error, 3)
 // 	q := `
 // 		SELECT * FROM subscriptions
@@ -169,7 +168,7 @@ func (s *SQLiteStorageService) GetSubscriptionsWithUsersAndServers(ctx context.C
 // 	queryEnd, queryArgs := s.builder.BuildParts([]string{"where", "order_by", "limit"}, args)
 // 	q += queryEnd
 
-// 	subscriptionsPtr := &[]entity.Subscription{}
+// 	subscriptionsPtr := &[]storage.Subscription{}
 // 	errs[0] = SelectContextWithNullFallback(ctx, s.db, subscriptionsPtr, q, queryArgs...)
 // 	if errs[0] != nil {
 // 		return nil, errs
@@ -206,14 +205,14 @@ func (s *SQLiteStorageService) GetSubscriptionsWithUsersAndServers(ctx context.C
 // 	q += queryEnd
 // 	queryArgs
 
-// 	usersPtr := &[]entity.User{}
+// 	usersPtr := &[]storage.User{}
 // 	errs[1] = SelectContextWithNullFallback(ctx, s.db, usersPtr, q, []interface{}{usersIDs})
 
 // 	q = fmt.Sprintf(`
 // 		SELECT * FROM servers
 // 		WHERE id IN (%s)
 // 	`, questions)
-// 	serversPtr := &[]entity.Server{}
+// 	serversPtr := &[]storage.VPNServerWithCountry{}
 // 	errs[2] = SelectContextWithNullFallback(ctx, s.db, serversPtr, q, []interface{}{serversIDs})
 
 // 	usersOk := errs[1] == nil
@@ -225,7 +224,7 @@ func (s *SQLiteStorageService) GetSubscriptionsWithUsersAndServers(ctx context.C
 // 	}
 
 // 	for i, sub := range subscriptions {
-// 		subs[i] = entity.SubscriptionWithUserAndServer{
+// 		subs[i] = storage.SubscriptionWithUserAndServer{
 // 			Subscription: sub,
 // 		}
 // 		if usersOk {
@@ -236,7 +235,7 @@ func (s *SQLiteStorageService) GetSubscriptionsWithUsersAndServers(ctx context.C
 // 	return subs, nil
 // }
 
-func (s *SQLiteStorageService) GetSubscriptionsWithServersByUserID(ctx context.Context, user_id storage.UserID, args builder.Arguments) (subs *[]entity.SubscriptionWithServer, err error) {
+func (s *SQLiteStorageService) GetSubscriptionsWithServersByUserID(ctx context.Context, user_id storage.UserID, args builder.Arguments) (subs *[]storage.SubscriptionWithServer, err error) {
 	q := `
 		SELECT * FROM subscriptions AS sub
 		JOIN servers AS serv 
@@ -251,7 +250,7 @@ func (s *SQLiteStorageService) GetSubscriptionsWithServersByUserID(ctx context.C
 	queryArgs = append(queryArgs, queryArgsAdd...)
 	log.Printf("query: `%s` args: %+v", q, queryArgs)
 
-	subs = &[]entity.SubscriptionWithServer{}
+	subs = &[]storage.SubscriptionWithServer{}
 	err = SelectContextWithNullFallback(ctx, s.db, subs, q, queryArgs...)
 	if err != nil {
 		return nil, err
@@ -260,7 +259,7 @@ func (s *SQLiteStorageService) GetSubscriptionsWithServersByUserID(ctx context.C
 	return subs, nil
 }
 
-func (s *SQLiteStorageService) GetSubscriptionsWithUsersByServerID(ctx context.Context, server_id storage.ServerID, args builder.Arguments) (subs *[]entity.SubscriptionWithUser, err error) {
+func (s *SQLiteStorageService) GetSubscriptionsWithUsersByServerID(ctx context.Context, server_id storage.ServerID, args builder.Arguments) (subs *[]storage.SubscriptionWithUser, err error) {
 	q := `
 		SELECT * FROM subscriptions AS s
 		JOIN users AS u
@@ -274,7 +273,7 @@ func (s *SQLiteStorageService) GetSubscriptionsWithUsersByServerID(ctx context.C
 	queryArgs = append(queryArgs, queryArgsAdd...)
 	log.Printf("query: `%s` args: %+v", q, queryArgs)
 
-	subs = &[]entity.SubscriptionWithUser{}
+	subs = &[]storage.SubscriptionWithUser{}
 	err = SelectContextWithNullFallback(ctx, s.db, subs, q, queryArgs...)
 	if err != nil {
 		return nil, err

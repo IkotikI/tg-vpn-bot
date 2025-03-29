@@ -9,7 +9,6 @@ import (
 	"vpn-tg-bot/internal/service/subscription"
 	"vpn-tg-bot/internal/storage"
 	"vpn-tg-bot/web/admin_panel/entity"
-	"vpn-tg-bot/web/admin_panel/service"
 	"vpn-tg-bot/web/admin_panel/views"
 	"vpn-tg-bot/web/admin_panel/views/templates"
 
@@ -25,7 +24,7 @@ const (
 type UserController struct {
 	BaseController
 
-	storage      service.StorageService
+	storage      storage.Storage
 	subscription subscription.VPN_API
 	// service?
 	// cookieStore *sessions.CookieStore
@@ -33,14 +32,8 @@ type UserController struct {
 }
 
 func NewUserController(r *mux.Router, storage storage.Storage, subscription subscription.VPN_API) *UserController {
-
-	storage_service, err := service.NewStorageService(storage)
-	if err != nil {
-		log.Fatalf("[ERR} Can't start storage service: %v", err)
-	}
-
 	c := &UserController{
-		storage:      storage_service,
+		storage:      storage,
 		subscription: subscription,
 	}
 	c.registerRoutes(r)
@@ -81,7 +74,7 @@ func (c *UserController) userView(w http.ResponseWriter, r *http.Request) {
 	subs, err := c.storage.GetSubscriptionsWithServersByUserID(ctx, id, nil)
 	if err != nil {
 		log.Printf("[ERR] UserController: userView: %v", err)
-		subs = &[]entity.SubscriptionWithServer{}
+		subs = &[]storage.SubscriptionWithServer{}
 	}
 
 	UI := map[string]templ.Component{

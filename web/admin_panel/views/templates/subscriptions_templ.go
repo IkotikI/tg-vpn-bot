@@ -8,9 +8,9 @@ package templates
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "vpn-tg-bot/web/admin_panel/entity"
+import "vpn-tg-bot/internal/storage"
 
-func SubscriptionsTable(subs *[]entity.SubscriptionWithUserAndServer) templ.Component {
+func SubscriptionsTable(subs *[]storage.SubscriptionWithUserAndServer) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -49,7 +49,7 @@ func SubscriptionsTable(subs *[]entity.SubscriptionWithUserAndServer) templ.Comp
 	})
 }
 
-func SubscriptionRow(sub entity.SubscriptionWithUserAndServer) templ.Component {
+func SubscriptionRow(sub storage.SubscriptionWithUserAndServer) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -72,7 +72,7 @@ func SubscriptionRow(sub entity.SubscriptionWithUserAndServer) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		subscriptionLink := SubscriptionLinkT(sub.UserID, sub.ServerID)
 		sub.User.ID = sub.UserID
-		sub.Server.ID = sub.ServerID
+		sub.VPNServer.ID = sub.ServerID
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<tr><td><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -94,7 +94,7 @@ func SubscriptionRow(sub entity.SubscriptionWithUserAndServer) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = ServerCellItem(sub.Server).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ServerCellItem(sub.VPNServerWithCountry).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -106,7 +106,7 @@ func SubscriptionRow(sub entity.SubscriptionWithUserAndServer) templ.Component {
 	})
 }
 
-func UserCellItem(user entity.User) templ.Component {
+func UserCellItem(user storage.User) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -157,7 +157,7 @@ func UserCellItem(user entity.User) templ.Component {
 	})
 }
 
-func ServerCellItem(server entity.Server) templ.Component {
+func ServerCellItem(server storage.VPNServerWithCountry) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

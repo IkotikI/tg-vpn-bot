@@ -8,10 +8,7 @@ import (
 	"net/url"
 	"time"
 	"vpn-tg-bot/internal/storage"
-	"vpn-tg-bot/pkg/sqlbuilder/builder"
-	"vpn-tg-bot/web/admin_panel/entity"
 	"vpn-tg-bot/web/admin_panel/middleware"
-	"vpn-tg-bot/web/admin_panel/service"
 	"vpn-tg-bot/web/admin_panel/views"
 	"vpn-tg-bot/web/admin_panel/views/templates"
 
@@ -25,21 +22,15 @@ var PageTimeout = 1000 * time.Millisecond
 type PanelController struct {
 	BaseController
 
-	storage service.StorageService
+	storage storage.Storage
 	// service?
 	// cookieStore *sessions.CookieStore
 	// mux         http.Handler
 }
 
 func NewPanelController(r *mux.Router, storage storage.Storage) *PanelController {
-
-	storage_service, err := service.NewStorageService(storage)
-	if err != nil {
-		log.Fatalf("[ERR] Can't start storage service: %v", err)
-	}
-
 	p := &PanelController{
-		storage: storage_service,
+		storage: storage,
 	}
 	p.registerRoutes(r)
 	return p
@@ -90,19 +81,19 @@ func (c *PanelController) usersView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	queryArgs := entity.ParseQueryArgs(values)
-	// queryArgs.ParseDefaultsFrom(entity.DefaultQueryArguments)
+	queryArgs := storage.ParseQueryArgs(values)
+	// queryArgs.ParseDefaultsFrom(storage.DefaultQueryArguments)
 
-	args := queryArgs.SelectArgs()
+	args := queryArgs.ToQueryArgs()
 
-	users, err := c.storage.GetEntityUsers(ctx, args)
+	users, err := c.storage.GetUsers(ctx, args)
 	if err != nil {
 		writeError(w, ctx, http.StatusInternalServerError, ErrMsgServerInternalError)
 		log.Printf("[ERR] Can't get users: %v", err)
 		return
 	}
 
-	pagination, err := MakePagination(ctx, c.storage, "users", queryArgs, args)
+	pagination, err := c.storage.MakePagination(ctx, c.storage, "users", queryArgs, args)
 	if err != nil {
 		log.Printf("[ERR] Error occurred while making pagination:", err)
 	}
@@ -143,19 +134,19 @@ func (c *PanelController) serversView(w http.ResponseWriter, r *http.Request) {
 		values = r.PostForm
 	}
 
-	queryArgs := entity.ParseQueryArgs(values)
-	// queryArgs.ParseDefaultsFrom(entity.DefaultQueryArguments)
+	queryArgs := storage.ParseQueryArgs(values)
+	// queryArgs.ParseDefaultsFrom(storage.DefaultQueryArguments)
 
-	args := queryArgs.SelectArgs()
+	args := queryArgs.ToQueryArgs()
 
-	servers, err := c.storage.GetEntityServers(ctx, args)
+	servers, err := c.storage.GetServersWithCountries(ctx, args)
 	if err != nil {
 		writeError(w, ctx, http.StatusInternalServerError, ErrMsgServerInternalError)
 		log.Printf("[ERR] Can't get users: %v", err)
 		return
 	}
 
-	pagination, err := MakePagination(ctx, c.storage, "servers", queryArgs, args)
+	pagination, err := c.storage.MakePagination(ctx, c.storage, "servers", queryArgs, args)
 	if err != nil {
 		log.Printf("[ERR] Error occurred while making pagination:", err)
 	}
@@ -196,7 +187,7 @@ func (p *PanelController) subscriptionsView(w http.ResponseWriter, r *http.Reque
 		values = r.PostForm
 	}
 
-	args := service.ParseSelectQueryArgs(values)
+	args := storage.ParseSelectQueryArgs(values)
 
 	subs, err := p.storage.GetSubscriptionsWithUsersAndServers(ctx, args)
 	if err != nil {
@@ -219,32 +210,6 @@ func (p *PanelController) subscriptionsView(w http.ResponseWriter, r *http.Reque
 		table.Render(ctx, w)
 	}
 
-}
-
-func MakePagination(ctx context.Context, db service.StorageService, table storage.Table, queryArgs *entity.QueryArguments, args *builder.SelectArguments) (entity.Pagination, error) {
-	if queryArgs == nil {
-		queryArgs = entity.DefaultQueryArguments
-	}
-	if args == nil {
-		args = queryArgs.SelectArgs()
-	}
-	args.From = builder.Table(table)
-
-	n, err := db.CountWithBuilder(ctx, args)
-	if err != nil {
-		return entity.Pagination{}, err
-	}
-	total_pages := n / queryArgs.PerPage
-	if n-total_pages > 0 {
-		total_pages += 1
-	}
-	return entity.Pagination{
-		Table:        table,
-		RecordsCount: n,
-		TotalPages:   total_pages,
-		Page:         queryArgs.Page,
-		PerPage:      queryArgs.PerPage,
-	}, nil
 }
 
 // func (p *AdminPanel) appUI(state AdminPanelState) templ.Component {

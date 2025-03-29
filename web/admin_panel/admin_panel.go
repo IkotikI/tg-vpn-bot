@@ -19,7 +19,7 @@ import (
 //go:embed public/*
 var publicAssets embed.FS
 
-// var publicAssetsMeta map[string]entity.FileMeta = make(map[string]entity.FileMeta)
+// var publicAssetsMeta map[string]storage.FileMeta = make(map[string]storage.FileMeta)
 
 const AssetsPrefix = "public"
 
@@ -179,7 +179,7 @@ func (s *Server) CheckSettings() error {
 // 		path = strings.TrimPrefix(path, "/")
 // 		path = strings.TrimPrefix(path, "/"+AssetsPrefix+"/")
 
-// 		publicAssetsMeta[path] = entity.FileMeta{
+// 		publicAssetsMeta[path] = storage.FileMeta{
 // 			Path:    path,
 // 			ModTime: info.ModTime(),
 // 		}

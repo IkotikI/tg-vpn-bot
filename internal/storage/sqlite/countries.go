@@ -50,8 +50,8 @@ func (s *SQLStorage) GetCountries(ctx context.Context, args *storage.QueryArgs) 
 	var queryEnd string
 	var queryArgs []interface{}
 	if args != nil {
-		selectArgs := s.parseQueryArgs(args)
-		queryEnd, queryArgs = s.builder.BuildParts([]string{"where", "order_by", "limit"}, selectArgs)
+
+		queryEnd, queryArgs = s.buildParts([]string{"where", "order_by", "limit"}, args)
 		q += " " + queryEnd
 	}
 

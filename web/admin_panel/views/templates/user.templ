@@ -1,11 +1,8 @@
 package templates
 
-import (
-	"vpn-tg-bot/internal/storage"
-	"vpn-tg-bot/web/admin_panel/entity"
-)
+import "vpn-tg-bot/internal/storage"
 
-templ UserMain(user *storage.User, subscriptions *[]entity.SubscriptionWithServer) {
+templ UserMain(user *storage.User, subscriptions *[]storage.SubscriptionWithServer) {
 	<h1 class="uk-h1">User <span class="uk-text-lighter">{ user.TelegramName }</span></h1>
 	<section class="user-profile flex">
 		<div class="user-info">
@@ -51,7 +48,7 @@ templ UserInfo(user *storage.User) {
 	</div>
 }
 
-templ SubscriptionsWithServersTable(subscriptions *[]entity.SubscriptionWithServer) {
+templ SubscriptionsWithServersTable(subscriptions *[]storage.SubscriptionWithServer) {
 	<table id="user-subscriptions-table" class="users-table uk-table uk-table-divider uk-table-hover">
 		<thead>
 			<tr class="text-center">
@@ -74,7 +71,7 @@ templ SubscriptionsWithServersTable(subscriptions *[]entity.SubscriptionWithServ
 	</table>
 }
 
-templ SubscriptionWithServerRow(s entity.SubscriptionWithServer) {
+templ SubscriptionWithServerRow(s storage.SubscriptionWithServer) {
 	{{ serverLink := ServerLinkT(s.ServerID) }}
 	<tr>
 		<td><a href={ serverLink }>{ s.ServerID.String() }</a></td>

@@ -1,8 +1,8 @@
 package templates
 
-import "vpn-tg-bot/web/admin_panel/entity"
+import "vpn-tg-bot/internal/storage"
 
-templ SubscriptionsTable(subs *[]entity.SubscriptionWithUserAndServer) {
+templ SubscriptionsTable(subs *[]storage.SubscriptionWithUserAndServer) {
 	<table class="uk-table uk-table-divider uk-table-hover">
 		<thead>
 			<tr>
@@ -21,28 +21,28 @@ templ SubscriptionsTable(subs *[]entity.SubscriptionWithUserAndServer) {
 	</table>
 }
 
-templ SubscriptionRow(sub entity.SubscriptionWithUserAndServer) {
+templ SubscriptionRow(sub storage.SubscriptionWithUserAndServer) {
 	{{ subscriptionLink := SubscriptionLinkT(sub.UserID, sub.ServerID) }}
 	{{ sub.User.ID = sub.UserID }}
-	{{ sub.Server.ID = sub.ServerID }}
+	{{ sub.VPNServer.ID = sub.ServerID }}
 	<tr>
 		<td><a href={ subscriptionLink }>Edit</a></td>
 		<td>
 			@UserCellItem(sub.User)
 		</td>
 		<td>
-			@ServerCellItem(sub.Server)
+			@ServerCellItem(sub.VPNServerWithCountry)
 		</td>
 	</tr>
 }
 
-templ UserCellItem(user entity.User) {
+templ UserCellItem(user storage.User) {
 	<div>
 		<a href={ UserLinkT(user.ID) }>{ user.TelegramName }</a>
 	</div>
 }
 
-templ ServerCellItem(server entity.Server) {
+templ ServerCellItem(server storage.VPNServerWithCountry) {
 	<div>
 		<a href={ ServerLinkT(server.ID) }>
 			{  server.Name + " #" }

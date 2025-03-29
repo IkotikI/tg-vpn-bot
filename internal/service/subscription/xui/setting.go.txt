@@ -85,14 +85,14 @@ func (s *SettingService) GetDefaultJsonConfig() (interface{}, error) {
 
 
 /*
-func (s *SettingService) GetAllSetting() (*entity.AllSetting, error) {
+func (s *SettingService) GetAllSetting() (*storage.AllSetting, error) {
 	db := database.GetDB()
 	settings := make([]*model.Setting, 0)
 	err := db.Model(model.Setting{}).Not("key = ?", "xrayTemplateConfig").Find(&settings).Error
 	if err != nil {
 		return nil, err
 	}
-	allSetting := &entity.AllSetting{}
+	allSetting := &storage.AllSetting{}
 	t := reflect.TypeOf(allSetting).Elem()
 	v := reflect.ValueOf(allSetting).Elem()
 	fields := reflect_util.GetFields(t)
@@ -517,7 +517,7 @@ func (s *SettingService) GetIpLimitEnable() (bool, error) {
 	return (accessLogPath != "none" && accessLogPath != ""), nil
 }
 
-func (s *SettingService) UpdateAllSetting(allSetting *entity.AllSetting) error {
+func (s *SettingService) UpdateAllSetting(allSetting *storage.AllSetting) error {
 	if err := allSetting.CheckValid(); err != nil {
 		return err
 	}

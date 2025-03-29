@@ -6,7 +6,7 @@ import (
 	"vpn-tg-bot/pkg/sqlbuilder/builder"
 )
 
-func DefaultSelectArgs() url.Values {
+func Defaultargs() url.Values {
 	return url.Values{
 		"per_page": []string{"10"},
 		"page":     []string{"1"},
