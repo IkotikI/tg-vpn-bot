@@ -35,3 +35,9 @@ tg: air-tg
 
 air-tg:
 	air -c cmd/bot/.air.toml
+
+
+# ---- Database ----
+
+test-db: 
+	go test -timeout 30s -run ^TestInitDB$$ vpn-tg-bot/internal/storage/sqlite -v
