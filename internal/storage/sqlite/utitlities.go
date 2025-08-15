@@ -18,7 +18,7 @@ func (s *SQLStorage) Count(ctx context.Context, args *storage.QueryArgs) (n int6
 	queryEnd, queryArgs = s.buildParts([]string{"from", "where"}, args)
 	q += queryEnd
 
-	log.Printf("query: `%s` args: %+v", q, queryArgs)
+	log.Printf("query: `%s` args: %+v\n", q, queryArgs)
 	count := &[]int64{}
 	err = s.db.SelectContext(ctx, count, q, queryArgs...)
 	if err != nil {

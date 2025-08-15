@@ -369,6 +369,7 @@ func (c *XUIClient) authFromLoginCookies(cookies []*http.Cookie) (auth *storage.
 		}
 	}
 
+	log.Printf("cookies %+v", cookies)
 	return nil, fmt.Errorf("token by cookie field '%s' don't found", c.TokenKey)
 }
 

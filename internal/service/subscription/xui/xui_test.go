@@ -37,7 +37,7 @@ func TestUpdateSubscription(t *testing.T) {
 		UserID:                test_UserID,
 		ServerID:              test_ServerID,
 		SubscriptionStatus:    storage.SubscriptionStatusActive,
-		SubscriptionExpiredAt: time.Now().Add(time.Hour),
+		SubscriptionExpiredAt: time.Now().Add(20 * time.Minute),
 	}
 
 	s := NewXUIService(x_ui.TokenKey_3x_ui, db, db)
@@ -51,7 +51,7 @@ func TestUpdateSubscription(t *testing.T) {
 
 }
 
-func TestGetSub(t *testing.T) {
+func TestGetSubLink(t *testing.T) {
 	db := makeStore()
 
 	s := NewXUIService(x_ui.TokenKey_3x_ui, db, db)

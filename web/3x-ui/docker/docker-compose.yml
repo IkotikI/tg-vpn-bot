@@ -3,8 +3,9 @@ services:
     image: ghcr.io/mhsanaei/3x-ui:latest
     container_name: 3x-ui
     ports: 
-     - 2053:2053
-     - 2096:2096
+     - 2053:2053 # Admin port
+     - 2096:2096 # Sub port
+     - 55555:55555 # Test VPN port
     volumes:
       - db:/etc/x-ui/
       - cert:/root/cert/

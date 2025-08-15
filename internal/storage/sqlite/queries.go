@@ -40,7 +40,7 @@ func (s *SQLStorage) GetServersWithCountries(ctx context.Context, args *storage.
 
 	queryEnd, queryArgs := s.buildParts([]string{"where", "order_by", "limit"}, args)
 	q += queryEnd
-	log.Printf("query: `%s` args: %+v", q, queryArgs)
+	log.Printf("query: `%s` args: %+v\n", q, queryArgs)
 
 	servers = &[]storage.VPNServerWithCountry{}
 	err = SelectContextWithNullFallback(ctx, s.db, servers, q, queryArgs...)
@@ -186,7 +186,7 @@ func (s *SQLStorage) GetSubscriptionsWithServersByUserID(ctx context.Context, us
 	queryEnd, queryArgsAdd := s.buildParts([]string{"order_by", "limit"}, args)
 	q += queryEnd
 	queryArgs = append(queryArgs, queryArgsAdd...)
-	log.Printf("query: `%s` args: %+v", q, queryArgs)
+	log.Printf("query: `%s` args: %+v\n", q, queryArgs)
 
 	subs = &[]storage.SubscriptionWithServer{}
 	err = SelectContextWithNullFallback(ctx, s.db, subs, q, queryArgs...)
@@ -209,7 +209,7 @@ func (s *SQLStorage) GetSubscriptionsWithUsersByServerID(ctx context.Context, se
 	queryEnd, queryArgsAdd := s.buildParts([]string{"order_by", "limit"}, args)
 	q += queryEnd
 	queryArgs = append(queryArgs, queryArgsAdd...)
-	log.Printf("query: `%s` args: %+v", q, queryArgs)
+	log.Printf("query: `%s` args: %+v\n", q, queryArgs)
 
 	subs = &[]storage.SubscriptionWithUser{}
 	err = SelectContextWithNullFallback(ctx, s.db, subs, q, queryArgs...)
@@ -228,7 +228,7 @@ func (s *SQLStorage) CountWithBuilder(ctx context.Context, args *storage.QueryAr
 	queryEnd, queryArgs := s.buildParts([]string{"from", "where"}, args)
 	q += queryEnd
 
-	log.Printf("query: `%s` args: %+v", q, queryArgs)
+	log.Printf("query: `%s` args: %+v\n", q, queryArgs)
 	count := &[]int64{}
 	err = s.db.SelectContext(ctx, count, q, queryArgs...)
 	if err != nil {

@@ -29,7 +29,8 @@ func TestAddClient(t *testing.T) {
 	client := &model.Client{
 		ID:         test_uuid,
 		Email:      test_email,
-		ExpiryTime: time.Now().Add(time.Hour * 24).Unix(),
+		ExpiryTime: time.Now().Add(10 * time.Minute).UnixMilli(),
+		Flow:       "xtls-rprx-vision",
 	}
 
 	bytes_test, err := xui.prepareClientPayload(test_inboundID, client)
@@ -53,7 +54,9 @@ func TestUpdateClient(t *testing.T) {
 	client := &model.Client{
 		ID:         test_uuid,
 		Email:      test_email,
-		ExpiryTime: time.Now().Add(time.Hour * 24).Unix(),
+		ExpiryTime: time.Now().Add(10 * time.Minute).UnixMilli(),
+		Flow:       "xtls-rprx-vision",
+		Enable:     true,
 	}
 
 	bytes_test, err := xui.prepareClientPayload(test_inboundID, client)

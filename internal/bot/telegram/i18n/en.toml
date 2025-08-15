@@ -1,0 +1,93 @@
+#Buttons
+[Profile]
+other='Profile'
+
+[Settings]
+other='Settings'
+
+[NewSub]
+other='New VPN'
+
+[MySubs]
+other='My VPNs'
+
+[UpBalance]
+other='Up Balance'
+
+#Messages
+[msgMain]
+other='''
+🔥 Our servers have no speed or traffic limits, VPN works on all devices, YouTube in 4K – without delays!
+
+🔥 Maximum anonymity and security that no VPN service in the world can provide.
+
+✅ Our channel: @VA_VPN_TG_Dev
+'''
+
+[msgNewcomer]
+other='''
+Welcome to @VA_VPN_TG_Dev_bot
+
+Your VPN is ready to go and will be available for FREE for three days!
+
+Install the app for your OS 👇
+
+🍏 iOS (https://apps.apple.com/ru/app/v2raytun/id6476628951)
+
+🤖 Android (https://github.com/hiddify/HiddifyNG/releases/download/v6.0.4/HiddifyNG.apk)
+
+🖥️ Windows (https://github.com/hiddify/hiddify-next/releases/download/v1.5.2/Hiddify-Windows-Setup-x64.exe)
+
+🍏 MacOS (https://apps.apple.com/us/app/v2box-v2ray-client/id6446814690)
+
+Plug the VPN key into the app 👇
+
+(Click the text below to copy):
+
+{{ .SubLink }}
+'''
+
+[msgProfile]
+other='''
+ID: {{ .ID }}
+Balance: {{ .Balance }}
+Active VPNs: {{ .SubsCount }}
+'''
+
+[msgSettings]
+other='<b>Settings</b>'
+
+[msgMySubs]
+other='<b>My VPN</b>'
+
+[msgBuySub]
+other='<b>Buy VPN</b>'
+
+[msgLanguages]
+other='<b>Select language</b>'
+
+[msgServerError]
+other='Sorry, something went wrong. Please try this feauture later or contact support.'
+
+[MainMenu]
+other='Main Menu'
+
+[nMonths]
+other='{{ .Count }} m.'
+
+[nYears]
+one = '{{ .Count }} y.'
+other='{{ .Count }} yy.'
+
+[ExtendSub]
+other='Extend VPN'
+
+[msgSub]
+other='''
+Server: {{ .Server }}
+Expired: {{ .Expired }}
+
+Your VPN link:
+
+{{ .Link }}
+'''

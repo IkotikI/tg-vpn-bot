@@ -46,7 +46,7 @@ func (s *SQLiteStorageService) GetUsers(ctx context.Context, args builder.Argume
 
 	queryEnd, queryArgs := s.builder.BuildParts([]string{"where", "order_by", "limit"}, args)
 	q += queryEnd
-	log.Printf("query: `%s` args: %+v", q, queryArgs)
+	log.Printf("query: `%s` args: %+v\n", q, queryArgs)
 
 	users = &[]storage.User{}
 	err = SelectContextWithNullFallback(ctx, s.db, users, q, queryArgs...)
@@ -67,7 +67,7 @@ func (s *SQLiteStorageService) GetServers(ctx context.Context, args builder.Argu
 
 	queryEnd, queryArgs := s.builder.BuildParts([]string{"where", "order_by", "limit"}, args)
 	q += queryEnd
-	log.Printf("query: `%s` args: %+v", q, queryArgs)
+	log.Printf("query: `%s` args: %+v\n", q, queryArgs)
 
 	servers = &[]storage.VPNServerWithCountry{}
 	err = SelectContextWithNullFallback(ctx, s.db, servers, q, queryArgs...)
@@ -248,7 +248,7 @@ func (s *SQLiteStorageService) GetSubscriptionsWithServersByUserID(ctx context.C
 	queryEnd, queryArgsAdd := s.builder.BuildParts([]string{"order_by", "limit"}, args)
 	q += queryEnd
 	queryArgs = append(queryArgs, queryArgsAdd...)
-	log.Printf("query: `%s` args: %+v", q, queryArgs)
+	log.Printf("query: `%s` args: %+v\n", q, queryArgs)
 
 	subs = &[]storage.SubscriptionWithServer{}
 	err = SelectContextWithNullFallback(ctx, s.db, subs, q, queryArgs...)
@@ -271,7 +271,7 @@ func (s *SQLiteStorageService) GetSubscriptionsWithUsersByServerID(ctx context.C
 	queryEnd, queryArgsAdd := s.builder.BuildParts([]string{"order_by", "limit"}, args)
 	q += queryEnd
 	queryArgs = append(queryArgs, queryArgsAdd...)
-	log.Printf("query: `%s` args: %+v", q, queryArgs)
+	log.Printf("query: `%s` args: %+v\n", q, queryArgs)
 
 	subs = &[]storage.SubscriptionWithUser{}
 	err = SelectContextWithNullFallback(ctx, s.db, subs, q, queryArgs...)
@@ -290,7 +290,7 @@ func (s *SQLiteStorageService) CountWithBuilder(ctx context.Context, args builde
 	queryEnd, queryArgs := s.builder.BuildParts([]string{"from", "where"}, args)
 	q += queryEnd
 
-	log.Printf("query: `%s` args: %+v", q, queryArgs)
+	log.Printf("query: `%s` args: %+v\n", q, queryArgs)
 	count := &[]int64{}
 	err = s.db.SelectContext(ctx, count, q, queryArgs...)
 	if err != nil {

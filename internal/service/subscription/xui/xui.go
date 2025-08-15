@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"sync"
 	"time"
 	"vpn-tg-bot/internal/storage"
@@ -22,6 +21,11 @@ var ErrZeroUserID = errors.New("user id is 0")
 var ErrZeroServerID = errors.New("server id is 0")
 var ErrInvalidSubscriptionStatus = errors.New("invalid subscription status")
 var ErrClientNotFound = errors.New("client not found")
+
+const (
+	TokenKey_3x_ui = x_ui.TokenKey_3x_ui
+	TokenKey_x_ui  = x_ui.TokenKey_x_ui
+)
 
 type ClientID = x_ui.ClientID
 
@@ -96,34 +100,39 @@ func (s *XUIService) UpdateSubscription(ctx context.Context, sub *storage.Subscr
 		return ErrZeroServerID
 	}
 
+	var enable bool = true
+	var isNewUser = false
 	oldSub, err := s.storage.GetSubscriptionByIDs(ctx, sub.UserID, sub.ServerID)
-	if err != nil && err != storage.ErrNoSuchSubscription {
+	//If there no subscription, then set isNewUser = true
+	if err == storage.ErrNoSuchSubscription {
+		isNewUser = true
+	} else if err != nil { // Other error returns
 		return e.Wrap("can't get old subscription", err)
 	}
 
-	if sub.SubscriptionExpiredAt.IsZero() {
-		sub.SubscriptionExpiredAt = oldSub.SubscriptionExpiredAt
-	}
-
-	var enable bool = true
-	// If disabled, then disabled. Otherwise, if not provided, set status
-	// based of expired_at time.
-	switch {
-	case oldSub.SubscriptionStatus == storage.SubscriptionStatusDisabled:
-		sub.SubscriptionStatus = storage.SubscriptionStatusDisabled
-		enable = false
-	case sub.SubscriptionStatus == "":
-		{
-			if sub.SubscriptionExpiredAt.Unix() > time.Now().Unix() {
-				sub.SubscriptionStatus = storage.SubscriptionStatusActive
-			} else {
-				sub.SubscriptionStatus = storage.SubscriptionStatusExpired
+	if !isNewUser && oldSub != nil {
+		// If there subscription, then carefully update it. "oldSub" is not nil only if err == nil.
+		if sub.SubscriptionExpiredAt.IsZero() {
+			sub.SubscriptionExpiredAt = oldSub.SubscriptionExpiredAt
+		}
+		// If disabled, then disabled. Otherwise, if not provided, set status
+		// based on expired_at time: if expired, then disabled, otherwise - active.
+		switch {
+		case oldSub.SubscriptionStatus == storage.SubscriptionStatusDisabled:
+			sub.SubscriptionStatus = storage.SubscriptionStatusDisabled
+			enable = false
+		case sub.SubscriptionStatus == "":
+			{
+				if sub.SubscriptionExpiredAt.Unix() > time.Now().Unix() {
+					sub.SubscriptionStatus = storage.SubscriptionStatusActive
+				} else {
+					sub.SubscriptionStatus = storage.SubscriptionStatusExpired
+				}
 			}
 		}
-	}
-
-	if !sub.IsCorrectStatus() {
-		return ErrInvalidSubscriptionStatus
+		if !sub.IsCorrectStatus() {
+			return ErrInvalidSubscriptionStatus
+		}
 	}
 
 	user, err := s.storage.GetUserByID(ctx, sub.UserID)
@@ -144,32 +153,13 @@ func (s *XUIService) UpdateSubscription(ctx context.Context, sub *storage.Subscr
 		SubID:      s.ClientSubIDByUser(user),
 	}
 
-	for i := 0; i < s.retries; i++ {
-		ctx2, cancel := context.WithTimeout(ctx, 400*time.Millisecond)
-		err = xui.UpdateClient(ctx2, s.inboundID, client)
-		cancel()
-		if err != nil {
-			if err == x_ui.ErrRecordNotFound {
-				log.Printf("[INFO] can't find client record on remote, try to add a new one")
-				ctx2, cancel := context.WithTimeout(ctx, 400*time.Millisecond)
-				err = xui.AddClient(ctx2, s.inboundID, client)
-				cancel()
-				if err == nil {
-					break
-				} else {
-					log.Printf("[ERR] can't add client, retry %d, error: %s", i+1, err)
-					break
-				}
-			}
-			log.Printf("[ERR] can't update client, retry %d, error: %s", i+1, err)
-			time.Sleep(100 * time.Millisecond)
-		} else {
-			break
-		}
+	if isNewUser {
+		err = xui.AddClient(ctx, s.inboundID, client)
+	} else {
+		err = xui.UpdateClient(ctx, s.inboundID, client)
 	}
-
 	if err != nil {
-		return e.Wrap(fmt.Sprintf("can't update client after %d retries", s.retries), err)
+		return e.Wrap("can't add client on remote", err)
 	}
 
 	// Save subscription only after it have processed by x-ui API

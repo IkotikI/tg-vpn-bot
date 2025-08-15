@@ -11,8 +11,12 @@ require (
 )
 
 require (
+	github.com/BurntSushi/toml v1.5.0 // indirect
 	github.com/a-h/templ v0.3.833 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/gorilla/sessions v1.4.0 // indirect
+	github.com/nicksnyder/go-i18n/v2 v2.5.1 // indirect
+	github.com/pelletier/go-toml v1.9.5 // indirect
+	golang.org/x/text v0.23.0 // indirect
 )

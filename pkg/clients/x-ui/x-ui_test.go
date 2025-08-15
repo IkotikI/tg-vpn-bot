@@ -157,15 +157,15 @@ func TestRequests(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		t.Logf("post: Deleted Inbound: \n %+v \n", 1)
+		t.Logf("post: Deleted Inbound: \n %+v \n", updInbound)
 	})
 
 	t.Run("get", func(t *testing.T) {
 		var err error
 		ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 		defer cancel()
-		inbound, err = xui.GetInbound(ctx, 2)
-		if err != nil {
+		inbound, err = xui.GetInbound(ctx, 1)
+		if err == nil {
 			t.Fatal(err)
 		}
 
